@@ -1,9 +1,18 @@
 //Import and initize libary 
 const express = require('express');
+const graphqlHTTP = require('express-graphql');
+const schema = require('./schema/schema');
+
 const app = express();
 
 //import controller file
 const imgController = require('./controller/ImageController');
+
+// Middleware for GraphQL
+app.use('/graphql', graphqlHTTP({
+    schema,
+    graphiql: true
+}));
 
 //Initlize a get end point EXAMPLE
 app.get('/',imgController.postImage);
