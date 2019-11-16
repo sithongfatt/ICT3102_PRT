@@ -27,15 +27,19 @@ import "assets/demo/demo.css";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
 
 import AdminLayout from "layouts/Admin.jsx";
+import { ApolloProvider } from "@apollo/react-hooks";
+import { client } from "./apollo"
 
 const hist = createBrowserHistory();
 
 ReactDOM.render(
-  <Router history={hist}>
-    <Switch>
-      <Route path="/admin" render={props => <AdminLayout {...props} />} />
-      <Redirect to="/admin/dashboard" />
-    </Switch>
-  </Router>,
+  <ApolloProvider client={client}>
+    <Router history={hist}>
+      <Switch>
+        <Route path="/admin" render={props => <AdminLayout {...props} />} />
+        <Redirect to="/admin/dashboard" />
+      </Switch>
+    </Router>
+  </ApolloProvider>,
   document.getElementById("root")
 );

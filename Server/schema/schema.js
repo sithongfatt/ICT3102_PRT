@@ -5,22 +5,23 @@ const _ = require('lodash');
 const { 
     GraphQLObjectType, 
     GraphQLID, 
+    GraphQLList,
     GraphQLString,
     GraphQLSchema 
 } = graphql;
 
 // Dummy data
 var responses = [
-    {id: '1', label: "Truck", topLeft: "40", topRight: "56", bottomLeft: "72", bottomRight: "73"},
-    {id: '2', label: "Car", topLeft: "36", topRight: "62", bottomLeft: "123", bottomRight: "161"},
-    {id: '3', label: "Bus", topLeft: "27", topRight: "58", bottomLeft: "219", bottomRight: "165"}
+    {image: '1', label: "Truck", topLeft: "40", topRight: "56", bottomLeft: "72", bottomRight: "73"},
+    {image: '2', label: "Car", topLeft: "36", topRight: "62", bottomLeft: "123", bottomRight: "161"},
+    {image: '3', label: "Bus", topLeft: "27", topRight: "58", bottomLeft: "219", bottomRight: "165"}
 ];
 
 // Model for GraphQL
 const YOLOType = new GraphQLObjectType({
     name: 'Yolo',
     fields: () => ({
-        id: { type: GraphQLID},
+        image: { type: GraphQLString},
         label: { type: GraphQLString},
         topLeft: { type: GraphQLString},
         topRight: { type: GraphQLString},
@@ -35,10 +36,16 @@ const RootQuery = new GraphQLObjectType({
     fields: {
         yolo: { // Front end to query 
             type: YOLOType, 
-            args: {id: {type:GraphQLID}}, // Query with argument
+            args: {image: {type:GraphQLString}}, // Query with argument
             resolve(parent,args) {
                 // Code to get data from database or other source
-                return _.find(responses, { id: args.id});
+                return _.find(responses, { image: args.image});
+            }
+        },
+        yolos: {
+            type: new GraphQLList(YOLOType),
+            resolve(parent, args){
+                return responses;
             }
         }
     }

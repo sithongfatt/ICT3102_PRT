@@ -29,6 +29,8 @@ import {
   Row,
   Col
 } from "reactstrap";
+import { Upload } from "../Upload";
+import { Files } from "../Files";
 import ImageUploader from 'react-images-upload';
 
 class Dashboard extends React.Component {
@@ -56,14 +58,8 @@ class Dashboard extends React.Component {
                   <CardTitle tag="h5">Upload Picture</CardTitle>
                 </CardHeader>
                 <CardBody>
-                  <ImageUploader
-                    withIcon={true}
-                    buttonText='Choose images'
-                    onChange={this.onDrop}
-                    imgExtension={['.jpg', '.gif', '.png', '.gif']}
-                    maxFileSize={5242880}
-                    withPreview={true}
-                  />
+                  <Upload />
+                  <Files />
                 </CardBody>
                 {/* <CardFooter>
                   <hr />

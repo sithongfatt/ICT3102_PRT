@@ -6,5 +6,5 @@ RUN npm install --production --silent && mv node_modules ../
 RUN npm install graphql express-graphql
 RUN npm install lodash
 COPY . .
-EXPOSE 3000
+EXPOSE 4000
 CMD npm start
