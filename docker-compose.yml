@@ -1,9 +1,12 @@
 version: '2.1'
 
 services:
+  frontend:
+    build: ./Frontend
+    ports:
+        - 5000:3000
   ict3102_prt:
-    image: ict3102_prt
-    build: .
+    build: ./Server
     environment:
       NODE_ENV: production
     ports:
