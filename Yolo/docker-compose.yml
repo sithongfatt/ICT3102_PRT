@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+    my_flask:
+        build: .   
+        entrypoint:
+            - flask
+            - run
+            - --host=0.0.0.0
+        environment:
+            - FLASK_DEBUG=1   
+            - FLASK_APP=./app/flaskAPI.py
+        ports: 
+            - "5000:5000"
+        
+           
+        
+            
+        
