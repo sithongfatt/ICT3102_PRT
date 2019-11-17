@@ -2,12 +2,26 @@ version: '2.1'
 
 services:
   frontend:
-    build: ./Frontend
+    build: 
+      ./Frontend # Build image from Frontend Dockerfile
     ports:
-        - 5000:3000
-  ict3102_prt:
-    build: ./Server
+      - 3000:3000 # Forward the exposed port 3000 on the container to port 3000 on the host machine
+  server:
+    build: 
+      ./Server # Build image from Server Dockerfile
     environment:
       NODE_ENV: production
     ports:
-      - 3000:3000
+      - 4000:4000
+  yolo:
+    build: 
+      ./Yolo # Build image from Yolo Dockerfile
+    entrypoint:
+      - flask
+      - run
+      - --host=0.0.0.0
+    environment:
+      - FLASK_DEBUG=1   
+      - FLASK_APP=./app/flaskAPI.py
+    ports:
+      - 5000:5000
