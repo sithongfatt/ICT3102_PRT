@@ -5,7 +5,14 @@ import React from "react";
 export const filesQuery = gql`
   {
     yoloImage
-    yoloLabel
+    yoloResponse {
+      label
+      confidence
+      topLeft
+      topRight
+      bottomLeft
+      bottomRight
+    }
   }
 `;
 

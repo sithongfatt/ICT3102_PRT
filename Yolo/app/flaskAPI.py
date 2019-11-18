@@ -27,11 +27,11 @@ def getYolo():
     img = request_data.get('yolo')
     # print("-----", file=sys.stderr)
     # print(img, file=sys.stderr)
-    result = yoloFunction(img)
+    return yoloFunction(img)
     # print("-----", file=sys.stderr)
     # print(result, file=sys.stderr)
 
-    return jsonify({"result":result})
+    # return jsonify({"result":result})
 
 
 if __name__ == '__main__':

@@ -58,7 +58,7 @@ class Dashboard extends React.Component {
                 </CardBody>
                 {/* <CardFooter>
                   <hr />
-                  <div className="stats">n
+                  <div className="stats">
                     <i className="fa fa-history" /> Updated 3 minutes ago
                   </div>
                 </CardFooter> */}

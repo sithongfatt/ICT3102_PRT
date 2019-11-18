@@ -1,6 +1,7 @@
 from darkflow.net.build import TFNet
 import cv2
 import numpy as np
+import json
 # import requests
 # import os
 # from scipy import misc
@@ -24,7 +25,7 @@ def yoloFunction(image):
     img1 = cv2.imdecode(img, cv2.IMREAD_COLOR)
     img2 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
     result = tfnet.return_predict(img2)
-    return str(result)
+    return json.dumps(str(result))
 
 def test_yolo():
     return test
