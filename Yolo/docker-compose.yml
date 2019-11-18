@@ -10,6 +10,7 @@ services:
         environment:
             - FLASK_DEBUG=1   
             - FLASK_APP=./app/flaskAPI.py
+            - PYTHONUNBUFFERED=0
         ports: 
             - "5000:5000"
         
