@@ -1,20 +1,32 @@
-//Import and initize libary 
+// Import and initize libary 
 const express = require('express');
-const graphqlHTTP = require('express-graphql');
-const schema = require('./schema/schema');
+const fetch = require('node-fetch');
 const { ApolloServer, gql } = require("apollo-server-express");
-const { createWriteStream, existsSync, mkdirSync } = require("fs");
+const { existsSync, mkdirSync } = require("fs");
 const path = require("path");
 
-const bytesarray = [];
-var body;
+const bytesArray = [];
+var bytesBody;
 var image = "";
-var label = "";
+var yoloResult;
+var yoloArray = [];
 
+const apiLink = 'http://localhost:5000/getYolo';
+
+// Type Defs and Resolvers for GraphQL
 const typeDefs = gql`
   type Query {
     yoloImage: String!
-    yoloLabel: String!
+    yoloResponse: [Yolo!]
+  }
+
+  type Yolo {
+    label: String!
+    confidence: String!
+    topLeft: String!
+    topRight: String!
+    bottomLeft: String!
+    bottomRight: String!
   }
 
   type Mutation {
@@ -25,50 +37,69 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     yoloImage: () => image,
-    yoloLabel: () => label
+    yoloResponse: () => yoloArray
   },
   Mutation: {
     uploadFile: async (_, { file }) => {
       const { createReadStream, filename } = await file;
-      
-    // if (files.length > 0) {
-    //     console.log("I'm here");
-    //     console.log(path.join(__dirname, "./images", files[0]));   
-    //     // fs.unlinkSync(path.join(__dirname, "./images", files[0].filename)); 
-    // }
-    // Portion to break files into Bytes array and pass to YOLO for response
-      console.log("First");
+      // Clear the arrays for fresh start
+      bytesArray.length = 0;
+      yoloArray.length = 0;
+
+      // Portion to break files into Bytes array and pass to YOLO for response
       await new Promise(res =>
         createReadStream()
-          .on("data", (chunk) => bytesarray.push(chunk))
-          // Uncomment below for writing of image
-        //   .pipe(createWriteStream(path.join(__dirname, "./images", filename)))
+          .on("data", (chunk) => bytesArray.push(chunk))
           .on("close", res)
       );
 
-      console.log("done");
-      console.log(bytesarray);
-      console.log(bytesarray.length);
-      body = Buffer.concat(bytesarray)
-      // Array Format to test with YOLO
-      console.log(typeof(body));
-      console.log(body);
-      console.log(body.length);
-      console.log("=========Converting============");
-      // JSON Format to test with YOLO
-      console.log(body.toJSON());
-      console.log(typeof(body));
-      console.log(body);
-      console.log(body.length);
-      console.log(file);
-      // Use Body as an argument to the YOLO request, update variables with YOLO response
+      // Concatenate all the bytes array and convert into JSON
+      bytesBody = Buffer.concat(bytesArray)
+      bytesBody = bytesBody.toJSON();
+      var bytesBodyJson = {
+        "yolo": bytesBody.data,
+      }
+
+      // Execute API getYolo
+      await fetch(apiLink, {
+        method: 'post',
+        body: JSON.stringify(bytesBodyJson),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then(response => response.json())
+        .then(responseData => yoloResult = JSON.parse(responseData.replace(/[']+/g,'\"')))
+        .catch(err => console.log(err));
+    
+      // Filtering yoloResult into GraphQL Response
+      for (yolo of yoloResult) {
+        yoloArray.push(
+          new Yolo(yolo.label, 
+            yolo.confidence,
+            yolo.topleft.x,
+            yolo.topleft.y,
+            yolo.bottomright.x,
+            yolo.bottomright.y));
+      }
       image = filename;
-      label = "Truck";
 
       return true;
     }
   }
 };
+
+// This class implements the Yolo GraphQL type
+class Yolo {
+  constructor(label, confidence, topLeft, topRight, bottomLeft, bottomRight) {
+    this.label = label;
+    this.confidence = confidence;
+    this.topLeft = topLeft;
+    this.topRight = topRight;
+    this.bottomLeft = bottomLeft;
+    this.bottomRight = bottomRight;
+  }
+}
 
 existsSync(path.join(__dirname, "./images")) || mkdirSync(path.join(__dirname, "./images"));
 
@@ -76,31 +107,8 @@ const server = new ApolloServer({ typeDefs, resolvers });
 
 const app = express();
 
-//import controller file
-// const imgController = require('./controller/ImageController');
-
-// Middleware for GraphQL
-// app.use('/graphql', graphqlHTTP({
-//     schema,
-//     graphiql: true
-// }));
-
 app.use("/images", express.static(path.join(__dirname, "./images")));
 server.applyMiddleware({ app });
 
-//Initlize a get end point EXAMPLE
-// app.get('/',imgController.postImage);
-
-// //EXPECTED END POINT
-// app.post('/uploadimage',(req,res) => console.log("TO BE IMPLEMENTED"));
-
 //PORT OF THE SERVER 
-app.listen(4000,() => console.log("Listening on port 4000"));
-
-
-
-// TO NOTE:
-// 1. TO RUN PLEASE RUN COMMAND "node.index.js"
-// 2. ALL CONTROLLER FILES WILL BE STORED INSDIE CONTROLLER FOLDER 
-// 3. MORE DEPENDENCY TO COME 
-// 4. THIS ENTIRE PROJECT FOLDER NOW IS SERVER NOT FRONTEND 
+app.listen(4000, () => console.log("Listening on port 4000"));

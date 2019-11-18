@@ -1,6 +1,7 @@
 from darkflow.net.build import TFNet
 import cv2
 import numpy as np
+import json
 # import requests
 # import os
 # from scipy import misc
@@ -20,19 +21,17 @@ test = [{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 
 def yoloFunction(image):
     #url = "https://f1.media.brightcove.com/8/1078702682/1078702682_6004950245001_6004956161001-vs.jpg?pubId=1078702682&videoId=6004956161001"
     #resp = urlopen(url)
-    print("------byte array-------")
-    print(image)
     img = np.asarray(image, dtype="uint8")
     img1 = cv2.imdecode(img, cv2.IMREAD_COLOR)
     img2 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
     result = tfnet.return_predict(img2)
-    print(result)
-# print("---------img array result------------")
-# print(img)
-# print("---------img imdecode result------------")
-# print(img1)
-# print("---------img cvtColor result------------")
-# print(img2)
+    return json.dumps(str(result))
 
 def test_yolo():
     return test
+
+def testOriginalFunction():
+    img1 = cv2.imread("./sample_img/car2.png")
+    img2 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    result = tfnet.return_predict(img2)
+    return str(result)

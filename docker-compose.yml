@@ -1,27 +1,31 @@
-version: '2.1'
+version: '3'
 
 services:
+  ################# Frontend #################
   frontend:
     build: 
-      ./Frontend # Build image from Frontend Dockerfile
+      ./Frontend  # Build image from Frontend Dockerfile
     ports:
       - 3000:3000 # Forward the exposed port 3000 on the container to port 3000 on the host machine
+  ################## Server ##################
   server:
     build: 
-      ./Server # Build image from Server Dockerfile
+      ./Server    # Build image from Server Dockerfile
     environment:
       NODE_ENV: production
     ports:
-      - 4000:4000
+      - 4000:4000 # Forward the exposed port 4000 on the container to port 4000 on the host machine
+  ################### YOLO ###################
   yolo:
     build: 
-      ./Yolo # Build image from Yolo Dockerfile
-    entrypoint:
+      ./Yolo      # Build image from Yolo Dockerfile
+    entrypoint:   # Set Flask entry point
       - flask
       - run
       - --host=0.0.0.0
     environment:
       - FLASK_DEBUG=1   
       - FLASK_APP=./app/flaskAPI.py
+      - PYTHONUNBUFFERED=0
     ports:
-      - 5000:5000
+      - 5000:5000 # Forward the exposed port 5000 on the container to port 5000 on the host machine
