@@ -8,7 +8,7 @@ RUN apk update
 RUN apk upgrade
 RUN apk add --update npm
 RUN apk add nodejs
-RUN npm install
+RUN npm install --silent
 
 COPY . .
 

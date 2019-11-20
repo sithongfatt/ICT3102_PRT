@@ -11,7 +11,7 @@ var image = "";
 var yoloResult;
 var yoloArray = [];
 
-const apiLink = 'http://localhost:5000/getYolo';
+const apiLink = 'http://yolo:5000/getYolo';
 
 // Type Defs and Resolvers for GraphQL
 const typeDefs = gql`
@@ -70,6 +70,7 @@ const resolvers = {
       })
         .then(response => response.json())
         .then(responseData => yoloResult = JSON.parse(responseData.replace(/[']+/g,'\"')))
+        .then(clearArray => yoloArray.length = 0)
         .catch(err => console.log(err));
     
       // Filtering yoloResult into GraphQL Response
