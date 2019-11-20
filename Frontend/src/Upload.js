@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
-import { filesQuery } from "./Files";
-import ImageUploader from 'react-images-upload';
+import { useMutation, useQuery } from "@apollo/react-hooks";
+
+var filename = "";
 
 const uploadFileMutation = gql`
   mutation UploadFile($file: Upload!) {
@@ -11,24 +11,45 @@ const uploadFileMutation = gql`
   }
 `;
 
+const filesQuery = gql`
+  {
+    yoloImage
+    yoloResponse {
+      label
+      confidence
+      topLeft
+      topRight
+      bottomLeft
+      bottomRight
+    }
+  }
+`;
+
 export const Upload = () => {
   const [uploadFile] = useMutation(uploadFileMutation, {
     refetchQueries: [{ query: filesQuery }]
   });
+
+  const { data, loading } = useQuery(filesQuery);
+  console.log(data);
+  console.log(loading);
   
-  // const onDrop = useCallback(
-  //   ([file]) => {
-  //     uploadFile({ variables: { file } });
-  //     console.log(file);
-  //   },
-  //   [uploadFile]
-  // );
+  // Queried returns result
+  if (data != null) {
+    // Check if the file is a new file
+    if (data.yoloImage != filename) {
+      // File needs to be drawn on
+      console.log("I AM GOING TO DRAW");
+      console.log(data.yoloResponse);
+      filename = data.yoloImage;
+    } else {
+      console.log("no need to draw");
+    }
+  } 
 
   const [file, setFiles] = useState([]);
   const { getRootProps, getInputProps, isDragActive} = useDropzone({
-    
     onDrop: acceptedFiles => {
-      // uploadFile({ variables:  [{file}] });
       setFiles(acceptedFiles.map(file => Object.assign(file, {
         preview: URL.createObjectURL(file),
       },uploadFile({ variables: { file } }))));
@@ -48,16 +69,17 @@ export const Upload = () => {
     border: '1px solid #eaeaea',
     marginBottom: 8,
     marginRight: 8,
-    width: 100,
-    height: 100,
+    width: "100%",
+    height: 500,
     padding: 4,
     boxSizing: 'border-box'
   };
   
   const thumbInner = {
-    display: 'flex',
-    minWidth: 0,
-    overflow: 'hidden'
+    display: 'block',
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "50%"
   };
   
   const img = {
@@ -87,24 +109,7 @@ export const Upload = () => {
           <p>Drag 'n' drop some files here, or click to select files</p>
       }
 
-{thumbs}
-      {/* {isDragActive ? (
-              <ImageUploader
-              withIcon={true}
-              buttonText='Dropping image'
-              imgExtension={['.jpg', '.gif', '.png', '.gif']}
-              maxFileSize={5242880}
-              withPreview={true}
-              />
-      ) : (
-        <ImageUploader
-              withIcon={true}
-              buttonText='Choose images or drop here'
-              imgExtension={['.jpg', '.gif', '.png', '.gif']}
-              maxFileSize={5242880}
-              withPreview={true}
-              />
-      )} */}
+      {thumbs}
     </div>
   );
 };

@@ -51,7 +51,7 @@ class Dashboard extends React.Component {
                 </CardHeader>
                 <CardBody>
                   <Upload />
-                  <Files />
+                  {/* <Files /> */}
                 </CardBody>
                 {/* <CardFooter>
                   <hr />
