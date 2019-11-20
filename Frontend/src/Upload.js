@@ -33,46 +33,61 @@ const filesQuery = gql`
 `;
 
 class Canvas extends React.Component {
+  constructor(props) {
+    super(props);
+    this.ctx = null;
+    this.canvas = null;
+    this.img = null;
+  }
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
-    const title = label + "(" + parseFloat(confidence.toFixed(3)) + ")";
+    const title = label + " " + confidence.slice(0,5);
     const w = bx - ax;
     const h = by - ay;
 
+    ctx.beginPath();
     ctx.rect(ax, ay, w, h);
     ctx.fillText(title, ax, ay);
+    ctx.stroke();
+    ctx.closePath();
   }
   componentDidMount() {
-    const canvas = this.refs.canvas
-    const ctx = canvas.getContext("2d")
-    const img = this.refs.image
-    canvas.height = 200
+    // Render initial drawing here
+    this.canvas = this.refs.canvas
+    this.ctx = this.canvas.getContext("2d")
+    this.img = this.refs.image
+    this.canvas.height = 500
+    this.canvas.width = 500
 
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0)
-      ctx.beginPath();
-      ctx.lineWidth = "1";
-      ctx.strokeStyle = "red";
-      ctx.fillStyle = "black";
-      ctx.font = "bold 8px Arial";
-      ctx.textBaseline = "bottom";
-      ctx.textAlign = "start";
+    this.img.onload = () => {
+      this.ctx.drawImage(this.img, 0, 0)
+    }
+  }
 
-      // 'topleft': {'x': 40, 'y': 56}, 'bottomright': {'x': 72, 'y': 73}
-      this.drawRectangle(ctx, "TRUCK", 0.2966457, 40, 56, 72, 73)
+  componentDidUpdate() {
+    // Render the draw here
+    console.log(this.props.flag);
+    console.log(this.props.json); 
+    var yoloResponse = this.props.json;
+    console.log(yoloResponse);
 
-      // 'topleft': {'x': 34, 'y': 62}, 'bottomright': {'x': 122, 'y': 160}
-      this.drawRectangle(ctx, "CAR", 0.15046194, 34, 62, 122, 160)
+    // Start with an empty state
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.drawImage(this.img, 0, 0)
+    this.ctx.lineWidth = "1";
+    this.ctx.strokeStyle = "red";
+    this.ctx.fillStyle = "black";
+    this.ctx.font = "bold 8px Arial";
+    this.ctx.textBaseline = "bottom";
+    this.ctx.textAlign = "start";
 
-      // 'topleft': {'x': 69, 'y': 54}, 'bottomright': {'x': 125, 'y': 84}
-      this.drawRectangle(ctx, "TRUCK", 0.17571707, 69, 54, 125, 84)
-
-      // 'topleft': {'x': 126, 'y': 61}, 'bottomright': {'x': 149, 'y': 74}
-      this.drawRectangle(ctx, "TRUCK", 0.16826859, 126, 61, 149, 74)
-
-      // 'topleft': {'x': 17, 'y': 40}, 'bottomright': {'x': 205, 'y': 164}
-      this.drawRectangle(ctx, "TRUCK", 0.46485525, 17, 40, 205, 164)
-
-      ctx.stroke();
+    for (let i = 0; i < yoloResponse.length; i++) {
+      this.drawRectangle(this.ctx, 
+        yoloResponse[i].label, 
+        yoloResponse[i].confidence, 
+        yoloResponse[i].topLeft,
+        yoloResponse[i].topRight,
+        yoloResponse[i].bottomLeft,
+        yoloResponse[i].bottomRight)
     }
   }
 
@@ -81,8 +96,8 @@ class Canvas extends React.Component {
       <Col md="12">
         <Row>
           <Col md="6">
-            <h6>Original {this.props.image.test}</h6>
-            <img ref="image" src={this.props.image.source} className="hidden" />
+            <h6>Original</h6>
+            <img ref="image" src={this.props.source} className="hidden"/>
           </Col>
           <Col md="6">
             <h6>Output</h6>
@@ -108,28 +123,19 @@ export const Upload = () => {
     }
   });
 
-
   // Fetching the image source
   file.map(file => imageSource = file.preview);
 
   const { data, loading } = useQuery(filesQuery);
+  console.log("Starting");
   console.log(data);
   console.log(loading);
+  console.log(filename);
+  console.log(imageSource);
   
-  // Queried returns result
-  if (data != null) {
-    // Check if the file is a new file
-    if (data.yoloImage != filename) {
-      // File needs to be drawn on
-      console.log("I AM GOING TO DRAW");
-      console.log(data.yoloResponse);
-      filename = data.yoloImage;
-    } else {
-      console.log("no need to draw");
-    }
-  } 
-
-  if (!imageSource) {
+   // Check if there is an image uploaded
+   if (!imageSource) {
+    // No image uploaded, return default page
     return (
       <div {...getRootProps()}>
         <input {...getInputProps()} />
@@ -138,23 +144,60 @@ export const Upload = () => {
             <p>Drop the files here ...</p> :
             <p>Drag 'n' drop some files here, or click to select files</p>
         }
-        {/* {thumbs} */}
       </div>
     );
   } else {
-    return (
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        {
-          isDragActive ?
-            <p>Drop the files here ...</p> :
-            <p>Drag 'n' drop some files here, or click to select files</p>
-        }
-  
-        <Canvas image={{ source: imageSource, test: "HEY" }}/>
-        {/* {thumbs} */}
-      </div>
-    );
-  }
+    // Image is uploaded, check for yolo response
+    if (data != null) {
+      // Yolo response is back, check if the file is a new file
+      if (data.yoloImage != filename) {
+        // File needs to be drawn on
+        console.log("I AM GOING TO DRAW");
+        console.log(data.yoloResponse);
+        // File is a new file needed to be drawn on
+        filename = data.yoloImage;
+        return (
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            {
+              isDragActive ?
+                <p>Drop the files here ...</p> :
+                <p>Drag 'n' drop some files here, or click to select files</p>
+            }
+      
+            <Canvas source={imageSource} flag={"Drawing"} json={data.yoloResponse}/>
+          </div>
+        );
+      } else {
+        console.log("no need to draw");
+        // File is an existing file that does not need to be drawn on
+        return (
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            {
+              isDragActive ?
+                <p>Drop the files here ...</p> :
+                <p>Drag 'n' drop some files here, or click to select files</p>
+            }
+      
+            <Canvas source={imageSource} flag={"Already rendered"} json={data.yoloResponse}/>
+          </div>
+        );
+      }
+    } else {
+      // Image has been uploaded but yolo data is not back
+      return (
+        <div {...getRootProps()}>
+          <input {...getInputProps()} />
+          {
+            isDragActive ?
+              <p>Drop the files here ...</p> :
+              <p>Drag 'n' drop some files here, or click to select files</p>
+          }
 
-};
+          <Canvas source={imageSource} flag={"Loading yolo response"}/>
+        </div>
+      );
+    }
+  }
+}
