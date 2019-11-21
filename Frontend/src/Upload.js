@@ -247,7 +247,7 @@ export const Upload = () => {
         return (
           <div {...getRootProps()}>
             <div style={slideStyle}>
-              <p>Minimum Confidence Level</p>
+              <h5>Minimum Confidence Level</h5>
               <SliderWithTooltip
                 marks={marks}
                 tipFormatter={percentFormatter}
@@ -274,7 +274,7 @@ export const Upload = () => {
         return (
           <div {...getRootProps()}>
             <div style={slideStyle}>
-              <p>Minimum Confidence Level</p>
+              <h5>Minimum Confidence Level</h5>
               <SliderWithTooltip
                 marks={marks}
                 tipFormatter={percentFormatter}
@@ -301,7 +301,7 @@ export const Upload = () => {
       return (
         <div {...getRootProps()}>
           <div style={slideStyle}>
-            <p>Minimum Confidence Level</p>
+            <h5>Minimum Confidence Level</h5>
             <SliderWithTooltip
               marks={marks}
               tipFormatter={percentFormatter}
