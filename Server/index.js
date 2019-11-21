@@ -40,6 +40,7 @@ const resolvers = {
   Mutation: {
     uploadFile: async (_, { file, confidence }) => {
       const { createReadStream, filename } = await file;
+      
       // Clear the arrays for fresh start
       bytesArray.length = 0;
       yoloArray.length = 0;
@@ -74,16 +75,10 @@ const resolvers = {
         .then(clearArray => (yoloArray.length = 0))
         .catch(err => console.log(err));
 
-      console.log("Converting");
-      console.log(confidence);
-      var confidenceFloat = parseFloat(confidence);
-      console.log(confidenceFloat);
       // Filtering yoloResult into GraphQL Response
+      var confidenceFloat = parseFloat(confidence);
       for (yolo of yoloResult) {
         var yoloConfidenceFloat = parseFloat(yolo.confidence);
-
-        console.log("Comparing");
-        console.log(yoloConfidenceFloat + " with " + confidenceFloat);
         // Confidence level meets the user requirements
         if (yoloConfidenceFloat > confidenceFloat) {
           yoloArray.push(
