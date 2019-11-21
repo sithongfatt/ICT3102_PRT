@@ -29,13 +29,13 @@ class Dashboard extends React.Component {
 
   constructor(props) {
     super(props);
-     this.state = { pictures: [] };
-     this.onDrop = this.onDrop.bind(this);
+    this.state = { pictures: [] };
+    this.onDrop = this.onDrop.bind(this);
   }
 
   onDrop(picture) {
     this.setState({
-        pictures: this.state.pictures.concat(picture),
+      pictures: this.state.pictures.concat(picture),
     });
   }
 
@@ -43,12 +43,10 @@ class Dashboard extends React.Component {
     return (
       <>
         <div className="content">
+        <div className="headingtitle">UPLOAD PICTURE</div>
           <Row>
             <Col md="12">
               <Card>
-                <CardHeader>
-                  <CardTitle tag="h5">Upload Picture</CardTitle>
-                </CardHeader>
                 <CardBody>
                   <Upload />
                   {/* <Files /> */}

@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 const { ApolloServer, gql } = require("apollo-server-express");
 const { existsSync, mkdirSync } = require("fs");
 const path = require("path");
+const bodyParser = require('body-parser')
 
 const bytesArray = [];
 var bytesBody;
@@ -69,14 +70,14 @@ const resolvers = {
         },
       })
         .then(response => response.json())
-        .then(responseData => yoloResult = JSON.parse(responseData.replace(/[']+/g,'\"')))
+        .then(responseData => yoloResult = JSON.parse(responseData.replace(/[']+/g, '\"')))
         .then(clearArray => yoloArray.length = 0)
         .catch(err => console.log(err));
-    
+
       // Filtering yoloResult into GraphQL Response
       for (yolo of yoloResult) {
         yoloArray.push(
-          new Yolo(yolo.label, 
+          new Yolo(yolo.label,
             yolo.confidence,
             yolo.topleft.x,
             yolo.topleft.y,
@@ -107,7 +108,7 @@ existsSync(path.join(__dirname, "./images")) || mkdirSync(path.join(__dirname, "
 const server = new ApolloServer({ typeDefs, resolvers });
 
 const app = express();
-
+app.use(bodyParser.json({ limit: '1mb' }));
 app.use("/images", express.static(path.join(__dirname, "./images")));
 server.applyMiddleware({ app });
 
