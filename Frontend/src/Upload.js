@@ -2,17 +2,25 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
 import { useMutation, useQuery } from "@apollo/react-hooks";
-import { Row, Col } from "reactstrap";
 import Slider, { createSliderWithTooltip } from "rc-slider";
 import "rc-slider/assets/index.css";
+import {
+  Card,
+  CardBody,
+  Row,
+  Col
+} from "reactstrap";
+import { bold } from "ansi-colors";
 
 // Declaring variables
 var filename = "";
 var imageSource;
+var resTitle = "";
+// var resTitle = "Please wait while we process your request."
 
 // Slider
 const slideStyle = {
-  width: "50%",
+  width: "35%",
   marginBottom: 30,
   textAlign: "center",
   marginLeft: "auto",
@@ -22,18 +30,38 @@ const SliderWithTooltip = createSliderWithTooltip(Slider);
 const marks = {
   0: {
     style: {
-      color: "red"
+      color: "#FF595E",
+      fontWeight: bold,
     },
-    label: <strong>0%</strong>
+    label: <strong>0.0(LOW)</strong>
   },
-  25: "25%",
-  50: "50%",
-  75: "75%",
+  25: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold,
+    },
+    label: <strong>0.25</strong>
+  },
+  50: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold,
+    },
+    label: <strong>0.5</strong>
+  },
+  75: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold,
+    },
+    label: <strong>0.75</strong>
+  },
   100: {
     style: {
-      color: "green"
+      color: "#7FFFD4",
+      fontWeight: bold,
     },
-    label: <strong>100%</strong>
+    label: <strong>1.0(HIGH)</strong>
   }
 };
 var confidenceLevel = "0.0";
@@ -45,7 +73,7 @@ function log(value) {
 }
 
 function percentFormatter(v) {
-  return `${v} %`;
+  return `${v / 100}`;
 }
 
 // GraphQL
@@ -75,9 +103,6 @@ class Canvas extends React.Component {
     this.ctx = null;
     this.canvas = null;
     this.img = null;
-
-    this.legendConfidence = "CONFIDENCE LEVEL: ";
-    this.rangeConfidence = " < 0.5 < ";
   }
 
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
@@ -143,18 +168,21 @@ class Canvas extends React.Component {
         yoloResponse[i].bottomLeft,
         yoloResponse[i].bottomRight
       );
+      
+      console.log("i=" + i)
+      console.log("yoloResponse.length" + (yoloResponse.length - 1))
+
+      if (i === (yoloResponse.length - 1)) {
+        resTitle = "FINAL RESULT"
+        // this.forceUpdate()
+      }
     }
   }
+
 
   render() {
     return (
       <Col md="12">
-        <p className="legendTitle">
-          {this.legendConfidence}
-          <p className="legendTitleLOW">LOW(0)</p>
-          {this.rangeConfidence}
-          <p className="legendTitleHIGH">HIGH(1)</p>
-        </p>
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
@@ -166,7 +194,8 @@ class Canvas extends React.Component {
             />
           </Col>
           <Col md="6" className="styleCol">
-            <h6>Result</h6>
+            <h6> {resTitle}</h6>
+            {/* <h6>Please wait while we process your request.</h6> */}
             <canvas ref="canvas" />
           </Col>
         </Row>
@@ -176,6 +205,7 @@ class Canvas extends React.Component {
 }
 
 export const Upload = () => {
+  resTitle = ""
   const [uploadFile] = useMutation(uploadFileMutation, {
     refetchQueries: [{ query: filesQuery }]
   });
@@ -211,13 +241,12 @@ export const Upload = () => {
 
   // Check if there is an image uploaded
   if (!imageSource) {
+    resTitle = ""
+
     // No image uploaded, return default page
     return (
       <div>
         <div style={slideStyle}>
-          <h5>
-            <strong>Minimum Confidence Level</strong>
-          </h5>
           <SliderWithTooltip
             marks={marks}
             tipFormatter={percentFormatter}
@@ -226,17 +255,21 @@ export const Upload = () => {
           />
         </div>
         <hr></hr>
-        <div {...getRootProps()}>
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <p className="paraTitle">Drop the files here ...</p>
-          ) : (
-            <p className="paraTitle">
-              Drag & drop image here, or click here to select file.
+        <Card>
+          <CardBody>
+            <div {...getRootProps()}>
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p className="paraTitle">Drop the files here ...</p>
+              ) : (
+                  <p className="paraTitle">
+                    Drag & drop image here, or click here to select file.
             </p>
-          )}
-          <hr></hr>
-        </div>
+                )}
+              {/* <hr></hr> */}
+            </div>
+          </CardBody>
+        </Card>
       </div>
     );
   } else {
@@ -244,6 +277,7 @@ export const Upload = () => {
     if (data != null) {
       // Yolo response is back, check if the file is a new file
       if (data.yoloImage != filename) {
+        resTitle = "Please wait while we process your request"
         // File needs to be drawn on
         console.log("I AM GOING TO DRAW");
         console.log(data.yoloResponse);
@@ -252,9 +286,6 @@ export const Upload = () => {
         return (
           <div>
             <div style={slideStyle}>
-              <h5>
-                <strong>Minimum Confidence Level</strong>
-              </h5>
               <SliderWithTooltip
                 marks={marks}
                 tipFormatter={percentFormatter}
@@ -263,29 +294,31 @@ export const Upload = () => {
               />
             </div>
             <hr></hr>
-            <div {...getRootProps()}>
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p className="paraTitle">Drop the files here ...</p>
-              ) : (
-                <p className="paraTitle">
-                  Drag & drop image here, or click here to select file.
+            <Card>
+              <CardBody>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p className="paraTitle">Drop the files here ...</p>
+                  ) : (
+                      <p className="paraTitle">
+                        Drag & drop image here, or click here to select file.
                 </p>
-              )}
-              <hr></hr>
-              <Canvas source={imageSource} json={data.yoloResponse} />
-            </div>
+                    )}
+                  <hr></hr>
+                  <Canvas source={imageSource} json={data.yoloResponse} />
+                </div>
+              </CardBody>
+            </Card>
           </div>
         );
       } else {
+        resTitle = "FINAL RESULT"
         console.log("no need to draw");
         // File is an existing file that does not need to be drawn on
         return (
           <div>
             <div style={slideStyle}>
-              <h5>
-                <strong>Minimum Confidence Level</strong>
-              </h5>
               <SliderWithTooltip
                 marks={marks}
                 tipFormatter={percentFormatter}
@@ -294,29 +327,32 @@ export const Upload = () => {
               />
             </div>
             <hr></hr>
-            <div {...getRootProps()}>
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p className="paraTitle">Drop the files here ...</p>
-              ) : (
-                <p className="paraTitle">
-                  Drag & drop image here, or click here to select file.
+            <Card>
+              <CardBody>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p className="paraTitle">Drop the files here ...</p>
+                  ) : (
+                      <p className="paraTitle">
+                        Drag & drop image here, or click here to select file.
                 </p>
-              )}
-              <hr></hr>
-              <Canvas source={imageSource} json={data.yoloResponse} />
-            </div>
+                    )}
+                  <hr></hr>
+                  <Canvas source={imageSource} json={data.yoloResponse} />
+                </div>
+              </CardBody>
+            </Card>
           </div>
         );
       }
+
     } else {
+      resTitle = "Please wait while we process your request"
       // Image has been uploaded but yolo data is not back
       return (
         <div>
           <div style={slideStyle}>
-            <h5>
-              <strong>Minimum Confidence Level</strong>
-            </h5>
             <SliderWithTooltip
               marks={marks}
               tipFormatter={percentFormatter}
@@ -325,18 +361,22 @@ export const Upload = () => {
             />
           </div>
           <hr></hr>
-          <div {...getRootProps()}>
-            <input {...getInputProps()} />
-            {isDragActive ? (
-              <p className="paraTitle">Drop the files here ...</p>
-            ) : (
-              <p className="paraTitle">
-                Drag & drop image here, or click here to select file.
+          <Card>
+            <CardBody>
+              <div {...getRootProps()}>
+                <input {...getInputProps()} />
+                {isDragActive ? (
+                  <p className="paraTitle">Drop the files here ...</p>
+                ) : (
+                    <p className="paraTitle">
+                      Drag & drop image here, or click here to select file.
               </p>
-            )}
-            <hr></hr>
-            <Canvas source={imageSource} />
-          </div>
+                  )}
+                <hr></hr>
+                <Canvas source={imageSource} />
+              </div>
+            </CardBody>
+          </Card>
         </div>
       );
     }
