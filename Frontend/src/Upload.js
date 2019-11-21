@@ -2,16 +2,56 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
 import { useMutation, useQuery } from "@apollo/react-hooks";
-// reactstrap components
 import { Row, Col } from "reactstrap";
+import Slider, { createSliderWithTooltip } from "rc-slider";
+import "rc-slider/assets/index.css";
 
 // Declaring variables
 var filename = "";
 var imageSource;
 
+// Slider
+const slideStyle = {
+  width: 600,
+  marginBottom: 25,
+  textAlign: "center",
+  marginLeft: "auto",
+  marginRight: "auto"
+};
+const SliderWithTooltip = createSliderWithTooltip(Slider);
+const marks = {
+  0: {
+    style: {
+      color: "red"
+    },
+    label: <strong>0%</strong>
+  },
+  25: "25%",
+  50: "50%",
+  75: "75%",
+  100: {
+    style: {
+      color: "green"
+    },
+    label: <strong>100%</strong>
+  }
+};
+var confidenceLevel = "0.0";
+function log(value) {
+  value = value / 100;
+  confidenceLevel = value.toString();
+  console.log(confidenceLevel);
+  console.log(typeof confidenceLevel);
+}
+
+function percentFormatter(v) {
+  return `${v} %`;
+}
+
+// GraphQL
 const uploadFileMutation = gql`
-  mutation UploadFile($file: Upload!) {
-    uploadFile(file: $file)
+  mutation UploadFile($file: Upload!, $confidence: String!) {
+    uploadFile(file: $file, confidence: $confidence)
   }
 `;
 
@@ -36,8 +76,9 @@ class Canvas extends React.Component {
     this.canvas = null;
     this.img = null;
   }
+
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
-    const title = label.toUpperCase() + " " + confidence.slice(0, 5);
+    const title = label.toUpperCase() + " " + confidence.slice(0, 5); // To remove after slider
     const w = bx - ax;
     const h = by - ay;
 
@@ -55,6 +96,7 @@ class Canvas extends React.Component {
     ctx.stroke();
     ctx.closePath();
   }
+
   componentDidMount() {
     // Render initial drawing here
     this.canvas = this.refs.canvas;
@@ -139,7 +181,9 @@ export const Upload = () => {
             {
               preview: URL.createObjectURL(file)
             },
-            uploadFile({ variables: { file } })
+            uploadFile({
+              variables: { file: file, confidence: confidenceLevel }
+            })
           )
         )
       );
@@ -161,6 +205,16 @@ export const Upload = () => {
     // No image uploaded, return default page
     return (
       <div {...getRootProps()}>
+        <div style={slideStyle}>
+          <h5>Minimum Confidence Level</h5>
+          <SliderWithTooltip
+            marks={marks}
+            tipFormatter={percentFormatter}
+            tipProps={{ overlayClassName: "foo" }}
+            onChange={log}
+          />
+        </div>
+        <hr></hr>
         <input {...getInputProps()} />
         {isDragActive ? (
           <p className="paraTitle">Drop the files here ...</p>
@@ -169,6 +223,7 @@ export const Upload = () => {
             Drag 'n' drop some files here, or click to select files
           </p>
         )}
+        <hr></hr>
       </div>
     );
   } else {
@@ -183,6 +238,16 @@ export const Upload = () => {
         filename = data.yoloImage;
         return (
           <div {...getRootProps()}>
+            <div style={slideStyle}>
+              <p>Minimum Confidence Level</p>
+              <SliderWithTooltip
+                marks={marks}
+                tipFormatter={percentFormatter}
+                tipProps={{ overlayClassName: "foo" }}
+                onChange={log}
+              />
+            </div>
+            <hr></hr>
             <input {...getInputProps()} />
             {isDragActive ? (
               <p className="paraTitle">Drop the files here ...</p>
@@ -200,6 +265,16 @@ export const Upload = () => {
         // File is an existing file that does not need to be drawn on
         return (
           <div {...getRootProps()}>
+            <div style={slideStyle}>
+              <p>Minimum Confidence Level</p>
+              <SliderWithTooltip
+                marks={marks}
+                tipFormatter={percentFormatter}
+                tipProps={{ overlayClassName: "foo" }}
+                onChange={log}
+              />
+            </div>
+            <hr></hr>
             <input {...getInputProps()} />
             {isDragActive ? (
               <p className="paraTitle">Drop the files here ...</p>
@@ -217,6 +292,16 @@ export const Upload = () => {
       // Image has been uploaded but yolo data is not back
       return (
         <div {...getRootProps()}>
+          <div style={slideStyle}>
+            <p>Minimum Confidence Level</p>
+            <SliderWithTooltip
+              marks={marks}
+              tipFormatter={percentFormatter}
+              tipProps={{ overlayClassName: "foo" }}
+              onChange={log}
+            />
+          </div>
+          <hr></hr>
           <input {...getInputProps()} />
           {isDragActive ? (
             <p className="paraTitle">Drop the files here ...</p>
