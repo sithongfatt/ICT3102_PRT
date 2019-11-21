@@ -1,9 +1,9 @@
-#!flask/bin/python
 from flask import Flask, jsonify, request
-#import valueTesting
-from app.objectDetection import yoloFunction, test_yolo, testOriginalFunction
-import sys
+from app.objectDetection import yoloFunction, test_yolo
+
 app = Flask(__name__)
+
+## ----------------- For testing purposes ----------------------
 
 @app.route('/')
 def hello():
@@ -14,24 +14,14 @@ def testYolo():
     result = test_yolo()
     return jsonify({"yolo": result})
 
-@app.route('/test-original')
-def testOriginalYolo():
-    result = testOriginalFunction() 
-    return jsonify({"yolo": result})
+## -------------------------------------------------------------
 
 @app.route('/getYolo', methods=['POST'])
 def getYolo():
-    #get byte array from requests
+    ## Retrieve backend data passed through json and send it over to 
     request_data = request.get_json()
-    # print(request_data, file=sys.stderr)
     img = request_data.get('yolo')
-    # print("-----", file=sys.stderr)
-    # print(img, file=sys.stderr)
     return yoloFunction(img)
-    # print("-----", file=sys.stderr)
-    # print(result, file=sys.stderr)
-
-    # return jsonify({"result":result})
 
 
 if __name__ == '__main__':
