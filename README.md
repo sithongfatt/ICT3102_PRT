@@ -128,31 +128,32 @@ const API_KEY = 'ENTER YOUR API';
 
 ### YOLO
 ### Flask API
-Flask is used to provide services for the backend nodeJS to call and transmit a byte array through JSON
+'Flask' is used to provide services for the backend 'nodeJS' to call and transmit a byte array through 'JSON'.
 
-
-Once nodeJS calls the post method and sends over the JSON, the result will be sent to Flask, followed by the object detection method.
+Once 'nodeJS' calls the post method and sends over the 'JSON', the result will be sent to 'Flask', followed by the object detection method.
 Afterwards, the result will be returned back to Flask and directly to nodeJS, no storing needed.
 
 ![](flask-api.gif)
 
-
-
-
 <!-- USAGE EXAMPLES -->
 ## Usage
-Usage of darkflow in our object detection function
+Usage of darkflow in our object detection function.
 
-.
 The byte array passed over from Flask will be directly used instead of having the need to opencv in the case of an URL.
 This will speed up the process and reducing the response time.
 
 ![](object-detection1.gif)
 
-
 Output of object detection:
-[{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}}, {'label': 'truck', 'confidence': 0.16879167, 'topleft': {'x': 221, 'y': 268}, 'bottomright': {'x': 1711, 'y': 732}}, {'label': 'car', 'confidence': 0.80724114, 'topleft': {'x': 255, 'y': 281}, 'bottomright': {'x': 1688, 'y': 755}}]
-
+```sh
+[{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}}, 
+{'label': 'truck', 'confidence': 0.16879167, 'topleft': {'x': 221, 'y': 268}, 'bottomright': {'x': 1711, 'y': 732}}, 
+{'label': 'car', 'confidence': 0.80724114, 'topleft': {'x': 255, 'y': 281}, 'bottomright': {'x': 1688, 'y': 755}}]
+```
+ - label: type of object
+ - confidence: somewhere between 0 and 1 (how confident yolo is about that detection) 
+ - topleft: pixel coordinate of top left corner of box. 
+ - bottomright: pixel coordinate of bottom right corner of box.
 
 <!-- ROADMAP -->
 ## Roadmap
