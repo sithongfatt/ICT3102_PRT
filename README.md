@@ -127,15 +127,31 @@ const API_KEY = 'ENTER YOUR API';
 ### Frontend
 
 ### YOLO
-### Backend
+### Flask API
+Flask is used to provide services for the backend nodeJS to call and transmit a byte array through JSON
+
+
+Once nodeJS calls the post method and sends over the JSON, the result will be sent to Flask, followed by the object detection method.
+Afterwards, the result will be returned back to Flask and directly to nodeJS, no storing needed.
+
+![](flask-api.gif)
+
+
+
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+Usage of darkflow in our object detection function
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+.
+The byte array passed over from Flask will be directly used instead of having the need to opencv in the case of an URL.
+This will speed up the process and reducing the response time.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+![](object-detection1.gif)
 
+
+Output of object detection:
+[{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}}, {'label': 'truck', 'confidence': 0.16879167, 'topleft': {'x': 221, 'y': 268}, 'bottomright': {'x': 1711, 'y': 732}}, {'label': 'car', 'confidence': 0.80724114, 'topleft': {'x': 255, 'y': 281}, 'bottomright': {'x': 1688, 'y': 755}}]
 
 
 <!-- ROADMAP -->
