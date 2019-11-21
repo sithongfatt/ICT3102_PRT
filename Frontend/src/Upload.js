@@ -70,7 +70,6 @@ class Canvas extends React.Component {
 
   componentDidUpdate() {
     // Render the draw here
-    console.log(this.props.flag);
     console.log(this.props.json);
     var yoloResponse = this.props.json;
     console.log(yoloResponse);
@@ -108,7 +107,12 @@ class Canvas extends React.Component {
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
-            <img ref="image" src={this.props.source} className="hidden" alt={filename} />
+            <img
+              ref="image"
+              src={this.props.source}
+              className="hidden"
+              alt={filename}
+            />
           </Col>
           <Col md="6" className="styleCol">
             <h6>Output</h6>
@@ -188,11 +192,7 @@ export const Upload = () => {
               </p>
             )}
             <hr></hr>
-            <Canvas
-              source={imageSource}
-              flag={"Drawing"}
-              json={data.yoloResponse}
-            />
+            <Canvas source={imageSource} json={data.yoloResponse} />
           </div>
         );
       } else {
@@ -209,11 +209,7 @@ export const Upload = () => {
               </p>
             )}
             <hr></hr>
-            <Canvas
-              source={imageSource}
-              flag={"Already rendered"}
-              json={data.yoloResponse}
-            />
+            <Canvas source={imageSource} json={data.yoloResponse} />
           </div>
         );
       }
@@ -230,7 +226,7 @@ export const Upload = () => {
             </p>
           )}
           <hr></hr>
-          <Canvas source={imageSource} flag={"Loading yolo response"} />
+          <Canvas source={imageSource} />
         </div>
       );
     }

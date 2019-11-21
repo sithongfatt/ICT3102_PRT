@@ -2,9 +2,6 @@
 const express = require("express");
 const fetch = require("node-fetch");
 const { ApolloServer, gql } = require("apollo-server-express");
-const { existsSync, mkdirSync } = require("fs");
-const path = require("path");
-const bodyParser = require("body-parser");
 
 const bytesArray = [];
 var bytesBody;
@@ -109,9 +106,6 @@ class Yolo {
   }
 }
 
-existsSync(path.join(__dirname, "./images")) ||
-  mkdirSync(path.join(__dirname, "./images"));
-
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -121,8 +115,6 @@ const server = new ApolloServer({
 });
 
 const app = express();
-app.use(bodyParser.json({ limit: "1mb" }));
-app.use("/images", express.static(path.join(__dirname, "./images")));
 server.applyMiddleware({ app });
 
 //PORT OF THE SERVER
