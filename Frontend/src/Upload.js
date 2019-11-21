@@ -75,6 +75,9 @@ class Canvas extends React.Component {
     this.ctx = null;
     this.canvas = null;
     this.img = null;
+
+    this.legendConfidence = "CONFIDENCE LEVEL: "
+    this.rangeConfidence = " < 0.5 < "
   }
 
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
@@ -146,6 +149,11 @@ class Canvas extends React.Component {
   render() {
     return (
       <Col md="12">
+        <p className="legendTitle">{this.legendConfidence}
+          <p className="legendTitleLOW">LOW(0)</p>
+          {this.rangeConfidence}
+          <p className="legendTitleHIGH">HIGH(1)</p>
+        </p>
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
@@ -157,7 +165,7 @@ class Canvas extends React.Component {
             />
           </Col>
           <Col md="6" className="styleCol">
-            <h6>Output</h6>
+            <h6>Result</h6>
             <canvas ref="canvas" />
           </Col>
         </Row>
@@ -220,7 +228,7 @@ export const Upload = () => {
           <p className="paraTitle">Drop the files here ...</p>
         ) : (
           <p className="paraTitle">
-            Drag 'n' drop some files here, or click to select files
+            Drag & drop image here, or click here to select file.
           </p>
         )}
         <hr></hr>
@@ -253,7 +261,7 @@ export const Upload = () => {
               <p className="paraTitle">Drop the files here ...</p>
             ) : (
               <p className="paraTitle">
-                Drag 'n' drop some files here, or click to select files
+                Drag & drop image here, or click here to select file.
               </p>
             )}
             <hr></hr>
@@ -280,7 +288,7 @@ export const Upload = () => {
               <p className="paraTitle">Drop the files here ...</p>
             ) : (
               <p className="paraTitle">
-                Drag 'n' drop some files here, or click to select files
+                Drag & drop image here, or click here to select file.
               </p>
             )}
             <hr></hr>
@@ -307,7 +315,7 @@ export const Upload = () => {
             <p className="paraTitle">Drop the files here ...</p>
           ) : (
             <p className="paraTitle">
-              Drag 'n' drop some files here, or click to select files
+              Drag & drop image here, or click here to select file.
             </p>
           )}
           <hr></hr>
