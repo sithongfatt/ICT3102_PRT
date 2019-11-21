@@ -1,12 +1,9 @@
-import React, { Component, useCallback, useState, useRef } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
 import { useMutation, useQuery } from "@apollo/react-hooks";
 // reactstrap components
-import {
-  Row,
-  Col
-} from "reactstrap";
+import { Row, Col } from "reactstrap";
 
 // Declaring variables
 var filename = "";
@@ -25,7 +22,7 @@ const filesQuery = gql`
       label
       confidence
       topLeft
-      topRight  
+      topRight
       bottomLeft
       bottomRight
     }
@@ -47,7 +44,6 @@ class Canvas extends React.Component {
     const w = bx - ax;
     const h = by - ay;
 
-
     if (confidence <= 0.5) {
       this.ctx.strokeStyle = "#FF595E";
       this.ctx.fillStyle = "#FF595E";
@@ -64,15 +60,15 @@ class Canvas extends React.Component {
   }
   componentDidMount() {
     // Render initial drawing here
-    this.canvas = this.refs.canvas
-    this.ctx = this.canvas.getContext("2d")
-    this.img = this.refs.image
+    this.canvas = this.refs.canvas;
+    this.ctx = this.canvas.getContext("2d");
+    this.img = this.refs.image;
 
     this.img.onload = () => {
-      this.canvas.height = this.img.height
-      this.canvas.width = this.img.width
-      this.ctx.drawImage(this.img, 0, 0)
-    }
+      this.canvas.height = this.img.height;
+      this.canvas.width = this.img.width;
+      this.ctx.drawImage(this.img, 0, 0);
+    };
   }
 
   componentDidUpdate() {
@@ -84,26 +80,28 @@ class Canvas extends React.Component {
 
     // Start with an empty state
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.drawImage(this.img, 0, 0)
+    this.ctx.drawImage(this.img, 0, 0);
     this.ctx.lineWidth = "2";
     this.ctx.strokeWidth = 5;
     this.ctx.shadowBlur = 30;
 
     this.ctx.strokeStyle = "#7FFFD4";
-    this.ctx.shadowColor = "#7FFFD4"
+    this.ctx.shadowColor = "#7FFFD4";
     this.ctx.fillStyle = "#F79A65";
     this.ctx.font = "10px Arial";
     this.ctx.textBaseline = "bottom";
     this.ctx.textAlign = "start";
 
     for (let i = 0; i < yoloResponse.length; i++) {
-      this.drawRectangle(this.ctx,
+      this.drawRectangle(
+        this.ctx,
         yoloResponse[i].label,
         yoloResponse[i].confidence,
         yoloResponse[i].topLeft,
         yoloResponse[i].topRight,
         yoloResponse[i].bottomLeft,
-        yoloResponse[i].bottomRight)
+        yoloResponse[i].bottomRight
+      );
     }
   }
 
@@ -118,7 +116,7 @@ class Canvas extends React.Component {
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
-            <img ref="image" src={this.props.source} className="hidden" />
+            <img ref="image" src={this.props.source} className="hidden" alt={filename} />
           </Col>
           <Col md="6" className="styleCol">
             <h6>Result</h6>
@@ -126,7 +124,7 @@ class Canvas extends React.Component {
           </Col>
         </Row>
       </Col>
-    )
+    );
   }
 }
 
@@ -138,14 +136,22 @@ export const Upload = () => {
   const [file, setFiles] = useState([]);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: acceptedFiles => {
-      setFiles(acceptedFiles.map(file => Object.assign(file, {
-        preview: URL.createObjectURL(file),
-      }, uploadFile({ variables: { file } }))));
+      setFiles(
+        acceptedFiles.map(file =>
+          Object.assign(
+            file,
+            {
+              preview: URL.createObjectURL(file)
+            },
+            uploadFile({ variables: { file } })
+          )
+        )
+      );
     }
   });
 
   // Fetching the image source
-  file.map(file => imageSource = file.preview);
+  file.map(file => (imageSource = file.preview));
 
   const { data, loading } = useQuery(filesQuery);
   console.log("Starting");
@@ -160,11 +166,13 @@ export const Upload = () => {
     return (
       <div {...getRootProps()}>
         <input {...getInputProps()} />
-        {
-          isDragActive ?
-            <p className="paraTitle">Drop the files here ...</p> :
-            <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
-        }
+        {isDragActive ? (
+          <p className="paraTitle">Drop the files here ...</p>
+        ) : (
+          <p className="paraTitle">
+            Drag & drop image here, or click here to select file.
+          </p>
+        )}
       </div>
     );
   } else {
@@ -180,13 +188,19 @@ export const Upload = () => {
         return (
           <div {...getRootProps()}>
             <input {...getInputProps()} />
-            {
-              isDragActive ?
-                <p className="paraTitle">Drop the files here ...</p> :
-                <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
-            }
+            {isDragActive ? (
+              <p className="paraTitle">Drop the files here ...</p>
+            ) : (
+              <p className="paraTitle">
+                Drag & drop image here, or click here to select file.
+              </p>
+            )}
             <hr></hr>
-            <Canvas source={imageSource} flag={"Drawing"} json={data.yoloResponse} />
+            <Canvas
+              source={imageSource}
+              flag={"Drawing"}
+              json={data.yoloResponse}
+            />
           </div>
         );
       } else {
@@ -195,13 +209,19 @@ export const Upload = () => {
         return (
           <div {...getRootProps()}>
             <input {...getInputProps()} />
-            {
-              isDragActive ?
-                <p className="paraTitle">Drop the files here ...</p> :
-                <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
-            }
+            {isDragActive ? (
+              <p className="paraTitle">Drop the files here ...</p>
+            ) : (
+              <p className="paraTitle">
+                Drag & drop image here, or click here to select file.
+              </p>
+            )}
             <hr></hr>
-            <Canvas source={imageSource} flag={"Already rendered"} json={data.yoloResponse} />
+            <Canvas
+              source={imageSource}
+              flag={"Already rendered"}
+              json={data.yoloResponse}
+            />
           </div>
         );
       }
@@ -210,15 +230,17 @@ export const Upload = () => {
       return (
         <div {...getRootProps()}>
           <input {...getInputProps()} />
-          {
-            isDragActive ?
-              <p className="paraTitle">Drop the files here ...</p> :
-              <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
-          }
+          {isDragActive ? (
+            <p className="paraTitle">Drop the files here ...</p>
+          ) : (
+            <p className="paraTitle">
+              Drag & drop image here, or click here to select file.
+            </p>
+          )}
           <hr></hr>
           <Canvas source={imageSource} flag={"Loading yolo response"} />
         </div>
       );
     }
   }
-}
+};
