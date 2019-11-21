@@ -2,9 +2,6 @@
 const express = require("express");
 const fetch = require("node-fetch");
 const { ApolloServer, gql } = require("apollo-server-express");
-const { existsSync, mkdirSync } = require("fs");
-const path = require("path");
-const bodyParser = require("body-parser");
 
 const bytesArray = [];
 var bytesBody;
@@ -31,7 +28,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    uploadFile(file: Upload!): Boolean
+    uploadFile(file: Upload!, confidence: String!): Boolean
   }
 `;
 
@@ -41,7 +38,7 @@ const resolvers = {
     yoloResponse: () => yoloArray
   },
   Mutation: {
-    uploadFile: async (_, { file }) => {
+    uploadFile: async (_, { file, confidence }) => {
       const { createReadStream, filename } = await file;
       // Clear the arrays for fresh start
       bytesArray.length = 0;
@@ -77,18 +74,29 @@ const resolvers = {
         .then(clearArray => (yoloArray.length = 0))
         .catch(err => console.log(err));
 
+      console.log("Converting");
+      console.log(confidence);
+      var confidenceFloat = parseFloat(confidence);
+      console.log(confidenceFloat);
       // Filtering yoloResult into GraphQL Response
       for (yolo of yoloResult) {
-        yoloArray.push(
-          new Yolo(
-            yolo.label,
-            yolo.confidence,
-            yolo.topleft.x,
-            yolo.topleft.y,
-            yolo.bottomright.x,
-            yolo.bottomright.y
-          )
-        );
+        var yoloConfidenceFloat = parseFloat(yolo.confidence);
+
+        console.log("Comparing");
+        console.log(yoloConfidenceFloat + " with " + confidenceFloat);
+        // Confidence level meets the user requirements
+        if (yoloConfidenceFloat > confidenceFloat) {
+          yoloArray.push(
+            new Yolo(
+              yolo.label,
+              yolo.confidence,
+              yolo.topleft.x,
+              yolo.topleft.y,
+              yolo.bottomright.x,
+              yolo.bottomright.y
+            )
+          );
+        }
       }
       image = filename;
 
@@ -109,9 +117,6 @@ class Yolo {
   }
 }
 
-existsSync(path.join(__dirname, "./images")) ||
-  mkdirSync(path.join(__dirname, "./images"));
-
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -121,8 +126,6 @@ const server = new ApolloServer({
 });
 
 const app = express();
-app.use(bodyParser.json({ limit: "1mb" }));
-app.use("/images", express.static(path.join(__dirname, "./images")));
 server.applyMiddleware({ app });
 
 //PORT OF THE SERVER
