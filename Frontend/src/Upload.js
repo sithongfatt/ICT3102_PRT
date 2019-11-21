@@ -37,9 +37,17 @@ class Canvas extends React.Component {
     this.img = null;
   }
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
-    const title = label + " " + confidence.slice(0, 5);
+    const title = label.toUpperCase() + " " + confidence.slice(0, 5);
     const w = bx - ax;
     const h = by - ay;
+
+    if (confidence <= 0.5) {
+      this.ctx.strokeStyle = "#FF595E";
+      this.ctx.fillStyle = "#FF595E";
+    } else {
+      this.ctx.strokeStyle = "#7FFFD4";
+      this.ctx.fillStyle = "#7FFFD4";
+    }
 
     ctx.beginPath();
     ctx.rect(ax, ay, w, h);
@@ -52,10 +60,10 @@ class Canvas extends React.Component {
     this.canvas = this.refs.canvas;
     this.ctx = this.canvas.getContext("2d");
     this.img = this.refs.image;
-    this.canvas.height = 500;
-    this.canvas.width = 500;
 
     this.img.onload = () => {
+      this.canvas.height = this.img.height;
+      this.canvas.width = this.img.width;
       this.ctx.drawImage(this.img, 0, 0);
     };
   }
@@ -70,10 +78,14 @@ class Canvas extends React.Component {
     // Start with an empty state
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.drawImage(this.img, 0, 0);
-    this.ctx.lineWidth = "1";
-    this.ctx.strokeStyle = "red";
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "bold 8px Arial";
+    this.ctx.lineWidth = "2";
+    this.ctx.strokeWidth = 5;
+    this.ctx.shadowBlur = 30;
+
+    this.ctx.strokeStyle = "#7FFFD4";
+    this.ctx.shadowColor = "#7FFFD4";
+    this.ctx.fillStyle = "#F79A65";
+    this.ctx.font = "10px Arial";
     this.ctx.textBaseline = "bottom";
     this.ctx.textAlign = "start";
 
@@ -94,11 +106,11 @@ class Canvas extends React.Component {
     return (
       <Col md="12">
         <Row>
-          <Col md="6">
+          <Col md="6" className="styleCol">
             <h6>Original</h6>
             <img ref="image" src={this.props.source} className="hidden" />
           </Col>
-          <Col md="6">
+          <Col md="6" className="styleCol">
             <h6>Output</h6>
             <canvas ref="canvas" />
           </Col>
@@ -147,9 +159,11 @@ export const Upload = () => {
       <div {...getRootProps()}>
         <input {...getInputProps()} />
         {isDragActive ? (
-          <p>Drop the files here ...</p>
+          <p className="paraTitle">Drop the files here ...</p>
         ) : (
-          <p>Drag 'n' drop some files here, or click to select files</p>
+          <p className="paraTitle">
+            Drag 'n' drop some files here, or click to select files
+          </p>
         )}
       </div>
     );
@@ -167,11 +181,13 @@ export const Upload = () => {
           <div {...getRootProps()}>
             <input {...getInputProps()} />
             {isDragActive ? (
-              <p>Drop the files here ...</p>
+              <p className="paraTitle">Drop the files here ...</p>
             ) : (
-              <p>Drag 'n' drop some files here, or click to select files</p>
+              <p className="paraTitle">
+                Drag 'n' drop some files here, or click to select files
+              </p>
             )}
-
+            <hr></hr>
             <Canvas
               source={imageSource}
               flag={"Drawing"}
@@ -186,11 +202,13 @@ export const Upload = () => {
           <div {...getRootProps()}>
             <input {...getInputProps()} />
             {isDragActive ? (
-              <p>Drop the files here ...</p>
+              <p className="paraTitle">Drop the files here ...</p>
             ) : (
-              <p>Drag 'n' drop some files here, or click to select files</p>
+              <p className="paraTitle">
+                Drag 'n' drop some files here, or click to select files
+              </p>
             )}
-
+            <hr></hr>
             <Canvas
               source={imageSource}
               flag={"Already rendered"}
@@ -205,11 +223,13 @@ export const Upload = () => {
         <div {...getRootProps()}>
           <input {...getInputProps()} />
           {isDragActive ? (
-            <p>Drop the files here ...</p>
+            <p className="paraTitle">Drop the files here ...</p>
           ) : (
-            <p>Drag 'n' drop some files here, or click to select files</p>
+            <p className="paraTitle">
+              Drag 'n' drop some files here, or click to select files
+            </p>
           )}
-
+          <hr></hr>
           <Canvas source={imageSource} flag={"Loading yolo response"} />
         </div>
       );

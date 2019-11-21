@@ -4,6 +4,7 @@ const fetch = require("node-fetch");
 const { ApolloServer, gql } = require("apollo-server-express");
 const { existsSync, mkdirSync } = require("fs");
 const path = require("path");
+const bodyParser = require("body-parser");
 
 const bytesArray = [];
 var bytesBody;
@@ -120,7 +121,7 @@ const server = new ApolloServer({
 });
 
 const app = express();
-
+app.use(bodyParser.json({ limit: "1mb" }));
 app.use("/images", express.static(path.join(__dirname, "./images")));
 server.applyMiddleware({ app });
 
