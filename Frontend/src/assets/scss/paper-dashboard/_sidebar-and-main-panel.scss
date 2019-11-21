@@ -288,6 +288,11 @@
   }
 }
 
+
+.card {
+  padding: 15px;
+}
+
 .main-panel {
   position: relative;
   background: url("https://www.ashville.co.uk/images/content/technology-785742_1920.jpg");
@@ -307,11 +312,33 @@
       width: 100%;
       padding: 5px;
       color: white;
+      letter-spacing: 4px;
+      font-weight: bold;
     }
 
     .paraTitle {
       text-align: center;
       margin: 0;
+      text-transform: uppercase;
+    }
+    .legendTitle {
+      margin: 0;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: center;
+      font-weight: bold;
+
+      p {
+        padding: 0 5px;
+      }
+
+      > .legendTitleLOW {
+        color: #ff595e;
+      }
+
+      > .legendTitleHIGH {
+        color: #7fffd4;
+      }
     }
 
     .styleCol {

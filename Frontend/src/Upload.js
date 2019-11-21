@@ -38,6 +38,9 @@ class Canvas extends React.Component {
     this.ctx = null;
     this.canvas = null;
     this.img = null;
+
+    this.legendConfidence = "CONFIDENCE LEVEL: "
+    this.rangeConfidence = " < 0.5 < "
   }
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
     const title = label.toUpperCase() + " " + confidence.slice(0, 5);
@@ -107,13 +110,18 @@ class Canvas extends React.Component {
   render() {
     return (
       <Col md="12">
+        <p className="legendTitle">{this.legendConfidence}
+          <p className="legendTitleLOW">LOW(0)</p>
+          {this.rangeConfidence}
+          <p className="legendTitleHIGH">HIGH(1)</p>
+        </p>
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
             <img ref="image" src={this.props.source} className="hidden" />
           </Col>
           <Col md="6" className="styleCol">
-            <h6>Output</h6>
+            <h6>Result</h6>
             <canvas ref="canvas" />
           </Col>
         </Row>
@@ -155,7 +163,7 @@ export const Upload = () => {
         {
           isDragActive ?
             <p className="paraTitle">Drop the files here ...</p> :
-            <p className="paraTitle">Drag 'n' drop some files here, or click to select files</p>
+            <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
         }
       </div>
     );
@@ -175,7 +183,7 @@ export const Upload = () => {
             {
               isDragActive ?
                 <p className="paraTitle">Drop the files here ...</p> :
-                <p className="paraTitle">Drag 'n' drop some files here, or click to select files</p>
+                <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
             }
             <hr></hr>
             <Canvas source={imageSource} flag={"Drawing"} json={data.yoloResponse} />
@@ -190,7 +198,7 @@ export const Upload = () => {
             {
               isDragActive ?
                 <p className="paraTitle">Drop the files here ...</p> :
-                <p className="paraTitle">Drag 'n' drop some files here, or click to select files</p>
+                <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
             }
             <hr></hr>
             <Canvas source={imageSource} flag={"Already rendered"} json={data.yoloResponse} />
@@ -205,7 +213,7 @@ export const Upload = () => {
           {
             isDragActive ?
               <p className="paraTitle">Drop the files here ...</p> :
-              <p className="paraTitle">Drag 'n' drop some files here, or click to select files</p>
+              <p className="paraTitle">Drag & drop image here, or click here to select file.</p>
           }
           <hr></hr>
           <Canvas source={imageSource} flag={"Loading yolo response"} />

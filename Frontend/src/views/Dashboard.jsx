@@ -43,7 +43,7 @@ class Dashboard extends React.Component {
     return (
       <>
         <div className="content">
-        <div className="headingtitle">UPLOAD PICTURE</div>
+        <div className="headingtitle">ICT3102 TEAM06 - OBJECT DETECTION</div>
           <Row>
             <Col md="12">
               <Card>
