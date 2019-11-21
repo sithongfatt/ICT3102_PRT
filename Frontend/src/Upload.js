@@ -1,4 +1,4 @@
-import React, { Component, useCallback, useState, useRef } from "react";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
 import { useMutation, useQuery } from "@apollo/react-hooks";
@@ -108,7 +108,7 @@ class Canvas extends React.Component {
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
-            <img ref="image" src={this.props.source} className="hidden" />
+            <img ref="image" src={this.props.source} className="hidden" alt={filename} />
           </Col>
           <Col md="6" className="styleCol">
             <h6>Output</h6>

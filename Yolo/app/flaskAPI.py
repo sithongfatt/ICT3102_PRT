@@ -1,7 +1,7 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
 #import valueTesting
-from app.cnn import yoloFunction, test_yolo, testOriginalFunction
+from app.objectDetection import yoloFunction, test_yolo, testOriginalFunction
 import sys
 app = Flask(__name__)
 

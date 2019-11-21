@@ -16,14 +16,11 @@ import React from "react";
 // reactstrap components
 import {
   Card,
-  CardHeader,
   CardBody,
-  CardTitle,
   Row,
   Col
 } from "reactstrap";
 import { Upload } from "../Upload";
-import { Files } from "../Files";
 
 class Dashboard extends React.Component {
 
