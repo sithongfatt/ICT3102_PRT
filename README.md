@@ -235,7 +235,7 @@ Check if response is being redirected to the least connection by calling and che
 Docker is ready once the following is loaded with a Guest IP of `192.168.99.100` (May differ)
 
 <p align="center">
-  <img src="images/DockerToolboxStartup.JPG">
+  <img src="images/DockerToolboxStartup.png">
 </p>
 
 4. Stop the `Virtual Machine` first to configure settings by executing the following:
