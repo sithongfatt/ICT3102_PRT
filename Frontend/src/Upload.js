@@ -143,7 +143,6 @@ class Canvas extends React.Component {
     // Render the draw here
     var yoloResponse = this.props.json;
 
-
     // Start with an empty state
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.drawImage(this.img, 0, 0);
@@ -170,13 +169,17 @@ class Canvas extends React.Component {
       );
     }
 
+    // Loading state
     if (this.props.json !== prevProps.json) {
       if (this.props.json && this.state.resTitle !== "Processed") {
         this.setState({ resTitle: "Processed" });
-      } 
+      }
     }
 
-    if (this.props.title === "notdrawing" && this.state.resTitle == "Processed") {
+    if (
+      this.props.title === "notdrawing" &&
+      this.state.resTitle === "Processed"
+    ) {
       this.setState({ resTitle: "Please drop a new image before we process" });
     }
   }
@@ -268,7 +271,7 @@ export const Upload = () => {
     // Image is uploaded, check for yolo response
     if (data != null) {
       // Yolo response is back, check if the file is a new file
-      if (data.yoloImage != filename) {
+      if (data.yoloImage !== filename) {
         // File is a new file needed to be drawn on
         filename = data.yoloImage;
         return (
