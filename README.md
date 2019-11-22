@@ -5,7 +5,7 @@
     <img src="images/logo.png" alt="Logo" width="400" height="300">
   </a>
   <h2 align="center">ICT3102 PRT - Team 06</h2>
-  <h1 align="center">Basic Object Detection</h1>
+  <h1 align="center">Advanced Object Detection</h1>
   </p>
 </p>
 
@@ -22,6 +22,7 @@
     - [GraphQL Query and Mutation](#GraphQL-Query-and-Mutation)
     - [User Centric Design](#User-Centric-Design)
     - [Compressed Docker Deployment](#Compressed-Docker-Deployment)
+    - [HAProxy Load Balancing](#HAProxy-Load-Balancing)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Docker Environment Installation](#Docker-Environment-Installation)
@@ -38,7 +39,7 @@
 Project Object Detection is part of a collaborative project between SIT and an industry partner with the main objective of creating a simple Single Page Application (SPA) with the corresponding backend services to detect and identify objects in the selected image.
 <br>
 <br>
-There are two versions of the project with this being the basic project with extremely simplistic set up procedures and the other intermediate project that requires a little more advanced set up explained at [ICT3102_PRT_Object Detection Advanced](https://github.com/sithongfatt/ICT3102_PRT/tree/masterlb)
+There are two versions of the project with this being the intermediate project that requires a little more advanced set up and the other basic project with extremely simplistic set up procedures explained at [ICT3102_PRT_Object Detection Basic](https://github.com/sithongfatt/ICT3102_PRT/tree/master)
 
 
 ## System Architecture
@@ -46,22 +47,27 @@ There are two versions of the project with this being the basic project with ext
 The following system architecture diagram will give a high level view of how the three main components of the application will interact with one another.
 
 <p align="center">
-  <img src="images/ArchitectureDiagram.JPG" alt="Logo" width="800" height="400">
+  <img src="images/ReplacedArchitectureDiagram.JPG" alt="Logo" width="800" height="400">
 </p>
-The three main components are broken down: 
+The four main components are broken down: 
 <br>
 
 - Client facing Frontend running on ReactJS with GraphQL Apollo Client
 - Transaction optimising Backend Server running on NodeJS's Express with GraphQL Apollo Server
+- Load balancing at HAProxy to direct traffic to one of the few replications of YOLO server
 - Image's object detection processing YOLO Server running on Python's Flask
 
 A high level view of the application's single transaction is as follow:
 
 ---> Client submits an image on the Frontend with stated minimum confidence level
 <br>
----> Backend Server receives the image and optimises the request over to YOLO
+---> Backend Server receives the image and optimises the request over to HAProxy
+<br>
+---> HAProxy uses the least connection method to select which YOLO server to send the request to
 <br>
 ---> YOLO processes the image and returns a JSON response of the objects detected
+<br>
+---> HAProxy receives the JSON response and directs response to Backend Server
 <br>
 ---> Backend Server receives the JSON response and optimises the response over to Frontend
 <br>
@@ -69,7 +75,7 @@ A high level view of the application's single transaction is as follow:
 
 ## System Design
 
-Looking at the overview of how the three main components will interact, it is prominent that there will be a huge load of the requests coming from the Frontend. There will be `Multiple Clients` requesting towards a `Single Backend Server` which then passes the request towards a `Single Yolo Server`. Therefore, distributing work load across the components was instilled into the design of the architecture. Furthermore, the communications between the dockerized containers are essential to the success of the project and there were a certain degree of optimisation done to ensure quick and smooth deployment.
+Looking at the overview of how the four main components will interact, it is prominent that there will be a huge load of the requests coming from the Frontend. There will be `Multiple Clients` requesting towards a `Single Backend Server` which then passes the request towards a `Single HAProxy` that directs the traffic to the least connected `Multiple Yolo Server`. Therefore, distributing work load across the components was instilled into the design of the architecture. Furthermore, the communications between the dockerized containers are essential to the success of the project and there were a certain degree of optimisation done to ensure quick and smooth deployment.
 
 The following sections will be discussing on the key points in the design of the project :
 
@@ -79,6 +85,7 @@ The following sections will be discussing on the key points in the design of the
 - GraphQL Query and Mutation
 - User Centric Design
 - Compressed Docker Deployment
+- HAProxy Load Balancing
 
 ### Three Layer Architecture
 
@@ -174,6 +181,32 @@ The project heavily utilised depcheck library to ensure that the dependencies in
   <img src="images/Post-Depcheck.png">
 </p>
 
+### HAProxy Load Balancing
+As the team has identified in the Basic Object Detection project that the `Single Yolo Server` is the endpoint with the heaviest workload, the team decided to further scale the project in Advanced Object Detection to load balance the request over to multiple replications of the Yolo Server using Docker Swarm Service :
+
+<p align="center">
+  <img src="images/DockerSwarmService.JPG">
+</p>
+
+In addition, these replicated services will be an individual container by itself :
+
+<p align="center">
+  <img src="images/DockerSwarmContainers.JPG">
+</p>
+
+In order to scale the service to more than 5 containers, simply execute the command in Docker to start 45 more containers :
+
+```sh
+docker service scale prod_yolo=50
+```
+
+Check if response is being redirected to the least connection by calling and checking response of different container hostnames :
+
+<p align="center">
+  <img src="images/loadbalancing.gif">
+</p>
+
+
 # Getting Started
 
 `Please ensure not to run the two version concurrently, remove the version fully before setting up the other.`
@@ -240,6 +273,8 @@ docker-machine start
 https://github.com/sithongfatt/ICT3102_PRT.git
 ```
 
+2. Switch the git branch over to `masterlb` for Advanced Object Detection :
+
 2. Download `yolov2.weights` from [this link](https://pjreddie.com/media/files/yolov2.weights)
 ```sh
 https://pjreddie.com/media/files/yolov2.weights
@@ -250,14 +285,52 @@ https://pjreddie.com/media/files/yolov2.weights
 Example of YOLODIR = C:\Users\DiligentStudent\GitHub\ICT3102_PRT\Yolo
 ```
 
-4. Docker enter the cloned project directory by executing the following `cd` command :
+4. Docker enter the cloned yolo folder directory by executing the following `cd` command :
 
 ```javascript
-// Example of PROJECTDIR = C:\Users\DiligentStudent\GitHub\ICT3102_PRT
-cd "PROJECTDIR"
+// Example of YOLODIR = C:\Users\DiligentStudent\GitHub\ICT3102_PRT\Yolo
+cd "YOLODIR"
 ```
 
-5. Execute either one of the following `compose` command :
+5. First build the yolo image with the command :
+
+```sh
+docker build -t ict3102_prt_yolo .
+```
+
+6. Initiate the docker swarm by executing either of the command depending on the OS :
+
+```javascript
+// Windows Pro Edition / Linux / Mac
+docker swarm init
+
+// Windows Home Edition
+docker swarm init --advertise-addr 192.168.99.100
+```
+
+7. Deploy your yolo servers by executing :
+
+```sh
+docker stack deploy --compose-file=docker-compose.yml prod
+```
+
+8. In the case where the containers of the HAProxy and yolo servers are not yet running :
+
+```javascript
+// Check if container is running by
+docker ps
+
+// If containers are not running
+docker service update --image ict3102_prt_yolo prod_yolo
+```
+
+9. Return to root directory to start Backend Server and Frontend :
+
+```sh
+cd ..
+```
+
+10. Execute either one of the following compose command :
 
 ```javascript
 // Attached
@@ -269,7 +342,7 @@ docker-compose up
 docker-compose up -d
 ```
 
-4. Start accessing the Single Page Application by going to [this link](http://localhost:3000)
+11. Start accessing the Single Page Application by going to [this link](http://localhost:3000)
 ```sh
 http://localhost:3000
 ```
