@@ -15,8 +15,6 @@ import React from "react";
 
 // reactstrap components
 import {
-  Card,
-  CardBody,
   Row,
   Col
 } from "reactstrap";
@@ -40,21 +38,11 @@ class Dashboard extends React.Component {
     return (
       <>
         <div className="content">
-        <div className="headingtitle">UPLOAD PICTURE</div>
+          <div className="headingtitle">ICT3102 TEAM06 - OBJECT DETECTION</div>
           <Row>
             <Col md="12">
-              <Card>
-                <CardBody>
-                  <Upload />
-                  {/* <Files /> */}
-                </CardBody>
-                {/* <CardFooter>
-                  <hr />
-                  <div className="stats">
-                    <i className="fa fa-history" /> Updated 3 minutes ago
-                  </div>
-                </CardFooter> */}
-              </Card>
+              <div className="filterTitle">MINIMUM CONFIDENCE LEVEL</div>
+              <Upload />
             </Col>
           </Row>
         </div>
