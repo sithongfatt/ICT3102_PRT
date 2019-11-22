@@ -86,12 +86,8 @@ This is an example of how you may give instructions on setting up your project l
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-```sh
-npm install npm@latest -g
-```
+- Docker tools 
+- Virtual Machine
 
 ### Installation
 
@@ -115,6 +111,30 @@ Name     | Protocol | Host IP   | Host Port | Guest IP  | Guest Port
 frontend | TCP      | 127.0.0.1 | 3000      | Docker IP | 3000 
 server   | TCP      | 127.0.0.1 | 4000      | Docker IP | 4000 
 yolo     | TCP      | 127.0.0.1 | 5000      | Docker IP | 5000 
+```
+
+Start up project 
+after the installation above is completed. you can clone the project with the following git link 
+
+```sh
+https://github.com/sithongfatt/ICT3102_PRT.git
+```
+
+Open docker tools terminal and change the project directory and run the following command 
+
+```sh
+docker-compose up --build
+```
+
+To make it run background you can type the following command 
+
+```sh
+docker-compose up -d
+```
+
+Now to start the webpages you can access 
+```sh
+localhost:3000
 ```
 
 <!-- System Architecture for Understanding -->
