@@ -47,7 +47,6 @@ The following system architecture diagram will give a high level view of how the
 
 <p align="center">
   <img src="images/ArchitectureDiagram.JPG" alt="Logo" width="800" height="400">
-  <h3 align="center">ICT 3102-Team 06-2019:Performance Requirement & Testing</h3>
 </p>
 The three main components are broken down: 
 <br>
@@ -136,7 +135,7 @@ The lightweight JSON response of the Yolo Server is shown below :
 Instead of the conventional REST calls, the project utilises GraphQL to empower the Frontend with the ability to only query the necessary information. In view that the Yolo algorithm may scale and evolve to large returned dataset in future, GraphQL allows the Frontend to easily scale alongside by only requesting what is required. Furthermore, when the system becomes more complex and introduces more microservices, GraphQL is a good fit as it can merge communications between multiple microservices into one GraphQL Schema.
 
 <p align="center">
-  <img src="images/GraphQLDataChange.jpg">
+  <img src="images/GraphQLDataChange.png">
 </p>
 
 ### User Centric Design
@@ -146,13 +145,13 @@ As mentioned in the design thinking behind GraphQL, the project is very user cen
 <h3 align="center"><b>0.0</b> Minimum Confidence Level fetches all results</h3> 
 
 <p align="center">
-  <img src="images/Pre-Confidence.PNG">
+  <img src="images/Pre-Confidence.jpg">
 </p>
 
 <h3 align="center"><b>7.5</b> Minimum Confidence Level fetches only accurate results</h3> 
 
 <p align="center">
-  <img src="images/Post-Confidence.PNG">
+  <img src="images/Post-Confidence.jpg">
 </p>
 
 ### Compressed Docker Deployment
@@ -166,13 +165,13 @@ The project heavily utilised depcheck library to ensure that the dependencies in
 <h3 align="center">As a result of doing so, the Docker image is significantly reduced from</h3> 
 
 <p align="center">
-  <img src="images/Pre-Depcheck.jpg">
+  <img src="images/Pre-Depcheck.png">
 </p>
 
 <h3 align="center">to</h3>
 
 <p align="center">
-  <img src="images/Post-Depcheck.jpg">
+  <img src="images/Post-Depcheck.png">
 </p>
 
 # Getting Started
@@ -194,7 +193,7 @@ The project heavily utilised depcheck library to ensure that the dependencies in
 
 2. Go through the installation client of `Docker Toolbox` while checking the following to download
 <p align="center">
-  <img src="images/DockerToolboxSetup.JPG">
+  <img src="images/DockerToolboxSetup.png">
 </p>
 
 3. After installation, run `Docker Quickstart Terminal` and accept the port permission prompts
@@ -293,8 +292,10 @@ http://localhost:3000
 
 ## Yolo Server
 
-- 
--
+- [Python Buster](https://packages.debian.org/buster/python3)
+- [Flask](https://www.fullstackpython.com/flask.html)
+- [TensorFlow](https://www.tensorflow.org/)
+- [Darknet](https://pjreddie.com/darknet/)
 
 # Acknowledgements
 
