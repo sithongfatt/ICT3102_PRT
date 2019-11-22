@@ -2,16 +2,78 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import gql from "graphql-tag";
 import { useMutation, useQuery } from "@apollo/react-hooks";
-// reactstrap components
-import { Row, Col } from "reactstrap";
+import Slider, { createSliderWithTooltip } from "rc-slider";
+import "rc-slider/assets/index.css";
+import { Card, CardBody, Row, Col } from "reactstrap";
+import { bold } from "ansi-colors";
 
 // Declaring variables
 var filename = "";
 var imageSource;
 
+// Slider
+var confidenceLevel = "0.0";
+const slideStyle = {
+  width: "35%",
+  marginBottom: 30,
+  textAlign: "center",
+  marginLeft: "auto",
+  marginRight: "auto"
+};
+const SliderWithTooltip = createSliderWithTooltip(Slider);
+const marks = {
+  0: {
+    style: {
+      color: "#FF595E",
+      fontWeight: bold
+    },
+    label: <strong>0.0(LOW)</strong>
+  },
+  25: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold
+    },
+    label: <strong>0.25</strong>
+  },
+  50: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold
+    },
+    label: <strong>0.5</strong>
+  },
+  75: {
+    style: {
+      color: "#FFFFFF",
+      fontWeight: bold
+    },
+    label: <strong>0.75</strong>
+  },
+  100: {
+    style: {
+      color: "#7FFFD4",
+      fontWeight: bold
+    },
+    label: <strong>1.0(HIGH)</strong>
+  }
+};
+
+// Slider onChange function
+function log(value) {
+  value = value / 100;
+  confidenceLevel = value.toString();
+}
+
+// Slider value formatter for tooltips
+function valueFormatter(v) {
+  return `${v / 100}`;
+}
+
+// GraphQL
 const uploadFileMutation = gql`
-  mutation UploadFile($file: Upload!) {
-    uploadFile(file: $file)
+  mutation UploadFile($file: Upload!, $confidence: String!) {
+    uploadFile(file: $file, confidence: $confidence)
   }
 `;
 
@@ -29,13 +91,18 @@ const filesQuery = gql`
   }
 `;
 
+// Canvas class for rendering of drawing
 class Canvas extends React.Component {
   constructor(props) {
     super(props);
     this.ctx = null;
     this.canvas = null;
     this.img = null;
+    this.state = {
+      resTitle: null
+    };
   }
+
   drawRectangle(ctx, label, confidence, ax, ay, bx, by) {
     const title = label.toUpperCase() + " " + confidence.slice(0, 5);
     const w = bx - ax;
@@ -55,11 +122,15 @@ class Canvas extends React.Component {
     ctx.stroke();
     ctx.closePath();
   }
+
   componentDidMount() {
     // Render initial drawing here
     this.canvas = this.refs.canvas;
     this.ctx = this.canvas.getContext("2d");
     this.img = this.refs.image;
+
+    // Changing the title
+    this.setState({ resTitle: "Please wait while we process your request" });
 
     this.img.onload = () => {
       this.canvas.height = this.img.height;
@@ -68,12 +139,9 @@ class Canvas extends React.Component {
     };
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     // Render the draw here
-    console.log(this.props.flag);
-    console.log(this.props.json);
     var yoloResponse = this.props.json;
-    console.log(yoloResponse);
 
     // Start with an empty state
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -100,6 +168,20 @@ class Canvas extends React.Component {
         yoloResponse[i].bottomRight
       );
     }
+
+    // Loading state
+    if (this.props.json !== prevProps.json) {
+      if (this.props.json && this.state.resTitle !== "Processed") {
+        this.setState({ resTitle: "Processed" });
+      }
+    }
+
+    if (
+      this.props.title === "notdrawing" &&
+      this.state.resTitle === "Processed"
+    ) {
+      this.setState({ resTitle: "Please drop a new image before we process" });
+    }
   }
 
   render() {
@@ -108,10 +190,15 @@ class Canvas extends React.Component {
         <Row>
           <Col md="6" className="styleCol">
             <h6>Original</h6>
-            <img ref="image" src={this.props.source} className="hidden" alt={filename} />
+            <img
+              ref="image"
+              src={this.props.source}
+              className="hidden"
+              alt={filename}
+            />
           </Col>
           <Col md="6" className="styleCol">
-            <h6>Output</h6>
+            <h6> {this.state.resTitle}</h6>
             <canvas ref="canvas" />
           </Col>
         </Row>
@@ -135,7 +222,9 @@ export const Upload = () => {
             {
               preview: URL.createObjectURL(file)
             },
-            uploadFile({ variables: { file } })
+            uploadFile({
+              variables: { file: file, confidence: confidenceLevel }
+            })
           )
         )
       );
@@ -145,92 +234,144 @@ export const Upload = () => {
   // Fetching the image source
   file.map(file => (imageSource = file.preview));
 
-  const { data, loading } = useQuery(filesQuery);
-  console.log("Starting");
-  console.log(data);
-  console.log(loading);
-  console.log(filename);
-  console.log(imageSource);
+  const { data } = useQuery(filesQuery);
 
   // Check if there is an image uploaded
   if (!imageSource) {
     // No image uploaded, return default page
     return (
-      <div {...getRootProps()}>
-        <input {...getInputProps()} />
-        {isDragActive ? (
-          <p className="paraTitle">Drop the files here ...</p>
-        ) : (
-          <p className="paraTitle">
-            Drag 'n' drop some files here, or click to select files
-          </p>
-        )}
+      <div>
+        <div style={slideStyle}>
+          <SliderWithTooltip
+            marks={marks}
+            tipFormatter={valueFormatter}
+            tipProps={{ overlayClassName: "foo" }}
+            onChange={log}
+          />
+        </div>
+        <hr></hr>
+        <Card>
+          <CardBody>
+            <div {...getRootProps()}>
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p className="paraTitle">Drop the files here ...</p>
+              ) : (
+                <p className="paraTitle">
+                  Drag & drop image here, or click here to select file.
+                </p>
+              )}
+              {/* <hr></hr> */}
+            </div>
+          </CardBody>
+        </Card>
       </div>
     );
   } else {
     // Image is uploaded, check for yolo response
     if (data != null) {
       // Yolo response is back, check if the file is a new file
-      if (data.yoloImage != filename) {
-        // File needs to be drawn on
-        console.log("I AM GOING TO DRAW");
-        console.log(data.yoloResponse);
+      if (data.yoloImage !== filename) {
         // File is a new file needed to be drawn on
         filename = data.yoloImage;
         return (
-          <div {...getRootProps()}>
-            <input {...getInputProps()} />
-            {isDragActive ? (
-              <p className="paraTitle">Drop the files here ...</p>
-            ) : (
-              <p className="paraTitle">
-                Drag 'n' drop some files here, or click to select files
-              </p>
-            )}
+          <div>
+            <div style={slideStyle}>
+              <SliderWithTooltip
+                marks={marks}
+                tipFormatter={valueFormatter}
+                tipProps={{ overlayClassName: "foo" }}
+                onChange={log}
+              />
+            </div>
             <hr></hr>
-            <Canvas
-              source={imageSource}
-              flag={"Drawing"}
-              json={data.yoloResponse}
-            />
+            <Card>
+              <CardBody>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p className="paraTitle">Drop the files here ...</p>
+                  ) : (
+                    <p className="paraTitle">
+                      Drag & drop image here, or click here to select file.
+                    </p>
+                  )}
+                  <hr></hr>
+                  <Canvas
+                    source={imageSource}
+                    json={data.yoloResponse}
+                    title={"drawing"}
+                  />
+                </div>
+              </CardBody>
+            </Card>
           </div>
         );
       } else {
-        console.log("no need to draw");
         // File is an existing file that does not need to be drawn on
         return (
-          <div {...getRootProps()}>
-            <input {...getInputProps()} />
-            {isDragActive ? (
-              <p className="paraTitle">Drop the files here ...</p>
-            ) : (
-              <p className="paraTitle">
-                Drag 'n' drop some files here, or click to select files
-              </p>
-            )}
+          <div>
+            <div style={slideStyle}>
+              <SliderWithTooltip
+                marks={marks}
+                tipFormatter={valueFormatter}
+                tipProps={{ overlayClassName: "foo" }}
+                onChange={log}
+              />
+            </div>
             <hr></hr>
-            <Canvas
-              source={imageSource}
-              flag={"Already rendered"}
-              json={data.yoloResponse}
-            />
+            <Card>
+              <CardBody>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  {isDragActive ? (
+                    <p className="paraTitle">Drop the files here ...</p>
+                  ) : (
+                    <p className="paraTitle">
+                      Drag & drop image here, or click here to select file.
+                    </p>
+                  )}
+                  <hr></hr>
+                  <Canvas
+                    source={imageSource}
+                    json={data.yoloResponse}
+                    title={"notdrawing"}
+                  />
+                </div>
+              </CardBody>
+            </Card>
           </div>
         );
       }
     } else {
       // Image has been uploaded but yolo data is not back
       return (
-        <div {...getRootProps()}>
-          <input {...getInputProps()} />
-          {isDragActive ? (
-            <p className="paraTitle">Drop the files here ...</p>
-          ) : (
-            <p className="paraTitle">
-              Drag 'n' drop some files here, or click to select files
-            </p>
-          )}
+        <div>
+          <div style={slideStyle}>
+            <SliderWithTooltip
+              marks={marks}
+              tipFormatter={valueFormatter}
+              tipProps={{ overlayClassName: "foo" }}
+              onChange={log}
+            />
+          </div>
           <hr></hr>
-          <Canvas source={imageSource} flag={"Loading yolo response"} />
+          <Card>
+            <CardBody>
+              <div {...getRootProps()}>
+                <input {...getInputProps()} />
+                {isDragActive ? (
+                  <p className="paraTitle">Drop the files here ...</p>
+                ) : (
+                  <p className="paraTitle">
+                    Drag & drop image here, or click here to select file.
+                  </p>
+                )}
+                <hr></hr>
+                <Canvas source={imageSource} title={"processing"} />
+              </div>
+            </CardBody>
+          </Card>
         </div>
       );
     }

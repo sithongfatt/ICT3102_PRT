@@ -1,18 +1,18 @@
-version: '3'
+version: "3.2"
 
 services:
   ################# Frontend #################
   frontend:
-    build: 
-      ./Frontend  # Build image from Frontend Dockerfile
+    image: ict3102_prt_frontend
+    build: ./Frontend # Build image from Frontend Dockerfile
     ports:
       - 3000:3000 # Forward the exposed port 3000 on the container to port 3000 on the host machine
     networks:
       - frontend
   ################## Server ##################
   server:
-    build: 
-      ./Server    # Build image from Server Dockerfile
+    image: ict3102_prt_server
+    build: ./Server # Build image from Server Dockerfile
     environment:
       NODE_ENV: production
     ports:
@@ -22,9 +22,9 @@ services:
       - backend
   ################### YOLO ###################
   yolo:
-    build: 
-      ./Yolo      # Build image from Yolo Dockerfile
-    entrypoint:   # Set Flask entry point
+    image: ict3102_prt_yolo
+    build: ./Yolo # Build image from Yolo Dockerfile
+    entrypoint: # Set Flask entry point
       - flask
       - run
       - --host=0.0.0.0
