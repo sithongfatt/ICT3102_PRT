@@ -176,7 +176,7 @@ class Canvas extends React.Component {
       } 
     }
 
-    if (this.props.title === "notdrawing" && this.state.resTitle == "Processed") {
+    if (this.props.title === "notdrawing" && this.state.resTitle === "Processed") {
       this.setState({ resTitle: "Please drop a new image before we process" });
     }
   }
@@ -268,7 +268,7 @@ export const Upload = () => {
     // Image is uploaded, check for yolo response
     if (data != null) {
       // Yolo response is back, check if the file is a new file
-      if (data.yoloImage != filename) {
+      if (data.yoloImage !== filename) {
         // File is a new file needed to be drawn on
         filename = data.yoloImage;
         return (
