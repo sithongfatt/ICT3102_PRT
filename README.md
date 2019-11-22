@@ -126,7 +126,7 @@ const API_KEY = 'ENTER YOUR API';
 
 ### Frontend
 
-### YOLO
+## YOLO
 ### Flask API
 `Flask` is used to provide services for the backend `nodeJS` to call and transmit a byte array through `JSON`.
 
@@ -136,15 +136,35 @@ Afterwards, the result will be returned back to Flask and directly to nodeJS, no
 ![](flask-api.gif)
 
 <!-- USAGE EXAMPLES -->
-## Usage
+### Usage
 Usage of `darkflow` in our object detection function.
 
 The byte array passed over from `Flask` will be directly used instead of having the need to `opencv` in the case of an URL.
-This will speed up the process and reducing the response time.
+This will speed up the process and reducing the response time. 
 
+As darkflow's `return_predict(img2)` requires a `numpy.ndarray`, the byte array from `Flask` can be directly passed over to `numpy.asarray(param)` to convert.
+
+```python
+from darkflow.net.build import TFNet
+import cv2
+import numpy as np
+import json
+
+options = {"model": "cfg/yolo.cfg", "load": "bin/yolo.weights", "threshold": 0.1}
+tfnet = TFNet(options)
+
+def yoloFunction(image):
+    img = np.asarray(image, dtype="uint8")
+    img1 = cv2.imdecode(img, cv2.IMREAD_COLOR)
+    img2 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+    result = tfnet.return_predict(img2) 
+    return json.dumps(str(result)) 
+```
 ![](object-detection1.gif)
 
-Output of object detection:
+Result from `return_predict(img2)` will be a list of dictionaries representing each detected object's values in the same format as a JSON, which will be returned to our backend `nodeJS` directly without storing anything.
+
+Output of `return_predict(img2)`:
 ```sh
 [{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}}, 
 {'label': 'truck', 'confidence': 0.16879167, 'topleft': {'x': 221, 'y': 268}, 'bottomright': {'x': 1711, 'y': 732}}, 
