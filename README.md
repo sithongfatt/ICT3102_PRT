@@ -1,18 +1,3 @@
-- Ensure that Docker is allocated 7GB memory
-- Ensure that yolo2.weights is placed into Yolo folder
-- Execute docker-compose up
-
-Frontend -> localhost:3000
-Server -> localhost:4000
-Yolo -> localhost:5000
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -28,27 +13,27 @@ Yolo -> localhost:5000
 
 ## Table of Contents
 
-- [About the Project](#about-the-project)
-  - [Built With](#built-with)
+- [Introduction](#introduction)
+  - [System Architecture](#System-Architecture)
+  - [System Design](#System-Design)
+    - [Three Layer Architecture](#Three-Layer-Architecture)
+    - [Asynchronous Client Side Rendering](#Asynchronous-Client-Side-Rendering)
+    - [Bytes Array Transmission over Image](#Bytes-Array-Transmission-over-Image)
+    - [GraphQL Query and Mutation](#GraphQL-Query-and-Mutation)
+    - [User Centric Design](#User-Centric-Design)
+    - [Compressed Docker Deployment](#Compressed-Docker-Deployment)
 - [Getting Started](#getting-started)
-
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-
-- [System Architecture](#systemarchitecture)
-  - [Frontend](#frontend)
-  - [YOLO](#YOLO)
-  - [Backend](#backend)
-- [Usage](#usage)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-- [Acknowledgements](#acknowledgements)
+  - [Docker Environment Installation](#Docker-Environment-Installation)
+  - [Project Installation](#Project-Installation)
+- [Project Technology Stack](#Project-Technology-Stack)
+  - [Frontend](#Frontend)
+  - [Backend Server](#Backend-Server)
+  - [Yolo Server](#Yolo-Server)
+- [Acknowledgements](#Acknowledgements)
+- [Contact Team](#Contact-Team)
 
 # Introduction
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
 
 Project Object Detection is part of a collaborative project between SIT and an industry partner with the main objective of creating a simple Single Page Application (SPA) with the corresponding backend services to detect and identify objects in the selected image.
 <br>
@@ -61,12 +46,8 @@ There are two versions of the project with this being the basic project with ext
 The following system architecture diagram will give a high level view of how the three main components of the application will interact with one another.
 
 <p align="center">
-  <a href="https://github.com/sgtech-ict3104/ict3104-team10-2019">
-    <img src="images/systemarchitecture.jpg" alt="Logo" width="800" height="400">
-  </a>
+  <img src="images/ArchitectureDiagram.JPG" alt="Logo" width="800" height="400">
   <h3 align="center">ICT 3102-Team 06-2019:Performance Requirement & Testing</h3>
-  <p align="center">
-  </p>
 </p>
 The three main components are broken down: 
 <br>
@@ -89,31 +70,55 @@ A high level view of the application's single transaction is as follow:
 
 ## System Design
 
-### Frontend
+Looking at the overview of how the three main components will interact, it is prominent that there will be a huge load of the requests coming from the Frontend. There will be `Multiple Clients` requesting towards a `Single Backend Server` which then passes the request towards a `Single Yolo Server`. Therefore, distributing work load across the components was instilled into the design of the architecture. Furthermore, the communications between the dockerized containers are essential to the success of the project and there were a certain degree of optimisation done to ensure quick and smooth deployment.
 
-### YOLO
+The following sections will be discussing on the key points in the design of the project :
 
-### Flask API
+- Three Layer Architecture
+- Asynchronous Client Side Rendering
+- Bytes Array Transmission over Image
+- GraphQL Query and Mutation
+- User Centric Design
+- Compressed Docker Deployment
 
-`Flask` is used to provide services for the backend `nodeJS` to call and transmit a byte array through `JSON`.
+### Three Layer Architecture
 
-Once `nodeJS` calls the post method and sends over the `JSON`, the result will be sent to `Flask`, followed by the object detection method.
-Afterwards, the result will be returned back to Flask and directly to nodeJS, no storing needed.
+The three main component follows the Single Responsibility Principle that acts as three modularized modules to perform specific tasks. As the Yolo Server has the heaviest workload, the other two components are there to offload it. In addition, this modularized architecture allows scalablity in terms as the processing power can be easily enhanced by adding powerful GPUs or adding more Yolo Servers.
+<br>
 
-![](flask-api.gif)
+The `Frontend` is designed to offload the image processing required in the Servers by being the only component that renders the image and performs drawing on it based on the JSON response. 
 
-<!-- USAGE EXAMPLES -->
+The `Backend Server` is designed to offload the Yolo Server's workload by reading the image data sent by the Frontend through GraphQL Apollo Client-Server in bytes array format. Afterwhich the bytes array is concatenated and converted into a JSON request perfectly suitable for the request towards the Yolo Server.
 
-## Usage
+The `Yolo Server` will then receive the well prepared and suitable data type request from the Backend Server and is only in charged of processing the objects detection. In addition, the Yolo Server returns a very light weight JSON response of the object labels and coordinates to be rendered on the Frontend.
 
-Usage of `darkflow` in our object detection function.
+### Asynchronous Client Side Rendering
 
-The byte array passed over from `Flask` will be directly used instead of having the need to `opencv` in the case of an URL.
-This will speed up the process and reducing the response time.
+As there are no physical image being transmitted, the client side Frontend is fully responsible for the rendering and drawing of the image and objects detected. In order to optimise this work flow, the Frontend immediately displays the submitted image on the left hand side and draws another copy into a canvas on the right hand side after the request has been sent over to the Backend Server as seen below :
+<p align="center">
+  <img src="images/Pre-AsyncRendering.png">
+</p>
+Upon receiving the asynchronous JSON response from Yolo Server, transmitted by the Backend Server, the client will then continue to draw the object detected on the canvas. This method of rendering ensures that the user is fully aware that things are running smoothly.
+<p align="center">
+  <img src="images/Post-AsyncRendering.png">
+</p>
 
-![](object-detection1.gif)
 
-Output of object detection:
+### Bytes Array Transmission over Image
+
+Even though the team understands that storage space is less costly in the current generation, the team identified that the scope of the project does not require any storing of image at all to perform the necessary functionalities. 
+Zero images are stored in the whole process of the project and the image is passed around in the following manner :
+<p align="center">
+  <img src="images/BytesOverImage.jpg">
+</p>
+
+Therefore, the images are transmitted across components as bytes array, the perfect data type that the Yolo Server can process directly instead of having the need to establish a connection with opencv to read the binaries. This will speed up the process and reducing the response time as the Yolo server now only has to execute the object detection algorithm and return a JSON response. 
+
+<p align="center">
+  <img src="images/flask-api.gif">
+</p>
+
+The lightweight JSON response of the Yolo Server is shown below :
 
 ```sh
 [{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}},
@@ -121,14 +126,60 @@ Output of object detection:
 {'label': 'car', 'confidence': 0.80724114, 'topleft': {'x': 255, 'y': 281}, 'bottomright': {'x': 1688, 'y': 755}}]
 ```
 
-- label: type of object
-- confidence: somewhere between 0 and 1 (how confident yolo is about that detection)
-- topleft: pixel coordinate of top left corner of box.
-- bottomright: pixel coordinate of bottom right corner of box.
+- label: Identified type of object
+- confidence: A float between 0.0 and 1.0 aboue the confidence yolo has about the detection
+- topleft: Pixel coordinate of top left corner of box.
+- bottomright: Pixel coordinate of bottom right corner of box.
+
+### GraphQL Query and Mutation
+
+Instead of the conventional REST calls, the project utilises GraphQL to empower the Frontend with the ability to only query the necessary information. In view that the Yolo algorithm may scale and evolve to large returned dataset in future, GraphQL allows the Frontend to easily scale alongside by only requesting what is required. Furthermore, when the system becomes more complex and introduces more microservices, GraphQL is a good fit as it can merge communications between multiple microservices into one GraphQL Schema.
+
+<p align="center">
+  <img src="images/GraphQLDataChange.jpg">
+</p>
+
+### User Centric Design
+
+As mentioned in the design thinking behind GraphQL, the project is very user centric and the team further thought of how the users will behave while interacting with the system. It has been identified that users uses the system to detect objects accurately and would in most of the case look for results of the highest confidence level. Therefore, the project also included a slider for the user to easily let the Backend Server know what is the minimum confidence level that the user wants. At the same time, this feature assist in reducing the workload of the Frontend as there are no redundant results of low confidence level sent back to the client for rendering.
+
+<h3 align="center"><b>0.0</b> Minimum Confidence Level fetches all results</h3> 
+
+<p align="center">
+  <img src="images/Pre-Confidence.PNG">
+</p>
+
+<h3 align="center"><b>7.5</b> Minimum Confidence Level fetches only accurate results</h3> 
+
+<p align="center">
+  <img src="images/Post-Confidence.PNG">
+</p>
+
+### Compressed Docker Deployment
+
+The project heavily utilised depcheck library to ensure that the dependencies in `package.json` is exactly what the system requires and that there are redundancy. Following the result set of depcheck, the package.json will only fetch what is required :
+
+<p align="center">
+  <img src="images/Depcheck.jpg">
+</p>
+
+<h3 align="center">As a result of doing so, the Docker image is significantly reduced from</h3> 
+
+<p align="center">
+  <img src="images/Pre-Depcheck.jpg">
+</p>
+
+<h3 align="center">to</h3>
+
+<p align="center">
+  <img src="images/Post-Depcheck.jpg">
+</p>
 
 # Getting Started
 
 `Please ensure not to run the two version concurrently, remove the version fully before setting up the other.`
+
+`Time for Docker Compose will take an average of 10 minutes from a clean Docker.`
 
 ## Prerequisites
 
@@ -183,20 +234,30 @@ docker-machine start
 
 ## Project Installation
 
-1. Clone the project with the following git link :
+1. Clone the project with the following `git` link :
 
 ```sh
 https://github.com/sithongfatt/ICT3102_PRT.git
 ```
 
-2. Enter the cloned project directory by :
+2. Download `yolov2.weights` from [this link](https://pjreddie.com/media/files/yolov2.weights)
+```sh
+https://pjreddie.com/media/files/yolov2.weights
+```
+
+3. Move the `yolov2.weights` into the yolo folder directory located at :
+```sh
+Example of YOLODIR = C:\Users\DiligentStudent\GitHub\ICT3102_PRT\Yolo
+```
+
+4. Docker enter the cloned project directory by executing the following `cd` command :
 
 ```javascript
 // Example of PROJECTDIR = C:\Users\DiligentStudent\GitHub\ICT3102_PRT
 cd "PROJECTDIR"
 ```
 
-3. Execute either one of the following compose command :
+5. Execute either one of the following `compose` command :
 
 ```javascript
 // Attached
@@ -213,77 +274,43 @@ docker-compose up -d
 http://localhost:3000
 ```
 
+# Project Technology Stack
 
 
-<!-- ROADMAP -->
+## Frontend
 
-# Roadmap
+- [ReactJS](https://expressjs.com/)
+- [Material-UI](https://material-ui.com/)
+- [CreativeTim](https://www.creative-tim.com/product/paper-dashboard-react)
+- [GraphQL Apollo Client](https://github.com/apollographql/apollo-client)
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a list of proposed features (and known issues).
+## Backend Server
 
-<!-- CONTRIBUTING -->
+- [NodeJS](https://nodejs.org/en/)
+- [Express](https://expressjs.com/)
+- [CreativeTim](https://www.creative-tim.com/product/paper-dashboard-react)
+- [GraphQL Apollo Server](https://github.com/apollographql/apollo-server)
 
-## Contributing
+## Yolo Server
 
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+- 
+-
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# Acknowledgements
 
-## Built With
+- [apollo-upload-client](https://github.com/jaydenseric/apollo-upload-client)
+- [rc-slider](https://www.npmjs.com/package/rc-slider)
+- [react-dropzone](https://github.com/react-dropzone/react-dropzone)
+- [depcheck](https://www.npmjs.com/package/depcheck)
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 
-- [Bootstrap](https://getbootstrap.com)
-- [JQuery](https://jquery.com)
-- [Laravel](https://laravel.com)
+# Contact Team
 
-<!-- LICENSE -->
+## LinkedIn Profiles
 
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-<!-- CONTACT -->
-
-## Contact
-
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
-
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-<!-- ACKNOWLEDGEMENTS -->
-
-## Acknowledgements
-
-- [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-- [Img Shields](https://shields.io)
-- [Choose an Open Source License](https://choosealicense.com)
-- [GitHub Pages](https://pages.github.com)
-- [Animate.css](https://daneden.github.io/animate.css)
-- [Loaders.css](https://connoratherton.com/loaders)
-- [Slick Carousel](https://kenwheeler.github.io/slick)
-- [Smooth Scroll](https://github.com/cferdinandi/smooth-scroll)
-- [Sticky Kit](http://leafo.net/sticky-kit)
-- [JVectorMap](http://jvectormap.com)
-- [Font Awesome](https://fontawesome.com)
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=flat-square
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
+ - `Darren Lim @ ` https://www.linkedin.com/in/darren-lim-chuan-siang-91213012b/
+ - `Darren Xiao @ ` https://www.linkedin.com/in/darren-jin-ru-xiao-745911a6
+ - `Evelyn @ ` https://www.linkedin.com/in/evelyn-tan-6ab41b174/
+ - `Hong Fatt @ ` https://www.linkedin.com/in/siew-hong-fatt-094955120/
+ - `Jasper @ ` https://www.linkedin.com/in/jasper-chua-346532152/
+ - `Siti @ ` http://linkedin.com/in/siti-nadhirah-aziz-2b513913a
