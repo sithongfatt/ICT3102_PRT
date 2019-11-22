@@ -24,7 +24,7 @@ Yolo        -> localhost:5000
     <img src="images/logo.png" alt="Logo" width="400" height="300">
   </a>
 
-  <h3 align="center">ICT 3104-Team 10-2019:Performance Requirement & Testing</h3>
+  <h3 align="center">ICT 3102-Team 06 Performance Requirement & Testing</h3>
 
   <p align="center">
 
@@ -95,18 +95,26 @@ npm install npm@latest -g
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+Docker Tools Box
+1. Get docker tool box form https://github.com/docker/toolbox/releases 
+2. Once docker tool box installation is complete, open docker tool terminals and the following command to get the IP address
+
 ```sh
-git clone https://github.com/your_username_/Project-Name.git
+Docker-machine IP
 ```
-3. Install NPM packages
+
+3. Right click on the the default virtual machine and go to setting 
+4. On the left hand side, select "Network" 
+5. Click on "Advanced" to expand the setting 
+6. Click on "Port Forwarding" and you will see a pop up window 
+7. Click on the green icon to append a new entries 
+8. add 3 new rows and enter the folllowing information : 
+
 ```sh
-npm install
-```
-4. Enter your API in `config.js`
-```JS
-const API_KEY = 'ENTER YOUR API';
+Name     | Protocol | Host IP   | Host Port | Guest IP  | Guest Port
+frontend | TCP      | 127.0.0.1 | 3000      | Docker IP | 3000 
+server   | TCP      | 127.0.0.1 | 4000      | Docker IP | 4000 
+yolo     | TCP      | 127.0.0.1 | 5000      | Docker IP | 5000 
 ```
 
 <!-- System Architecture for Understanding -->
@@ -117,7 +125,7 @@ const API_KEY = 'ENTER YOUR API';
     <img src="images/systemarchitecture.jpg" alt="Logo" width="800" height="400">
   </a>
 
-  <h3 align="center">ICT 3104-Team 10-2019:Performance Requirement & Testing</h3>
+  <h3 align="center">ICT 3102-Team 06-2019:Performance Requirement & Testing</h3>
 
   <p align="center">
 
@@ -126,7 +134,7 @@ const API_KEY = 'ENTER YOUR API';
 
 ### Frontend
 
-## YOLO
+### YOLO
 ### Flask API
 `Flask` is used to provide services for the backend `nodeJS` to call and transmit a byte array through `JSON`.
 
@@ -136,35 +144,15 @@ Afterwards, the result will be returned back to Flask and directly to nodeJS, no
 ![](flask-api.gif)
 
 <!-- USAGE EXAMPLES -->
-### Usage
+## Usage
 Usage of `darkflow` in our object detection function.
 
 The byte array passed over from `Flask` will be directly used instead of having the need to `opencv` in the case of an URL.
-This will speed up the process and reducing the response time. 
+This will speed up the process and reducing the response time.
 
-As darkflow's `return_predict(img2)` requires a `numpy.ndarray`, the byte array from `Flask` can be directly passed over to `numpy.asarray(param)` to convert.
-
-```python
-from darkflow.net.build import TFNet
-import cv2
-import numpy as np
-import json
-
-options = {"model": "cfg/yolo.cfg", "load": "bin/yolo.weights", "threshold": 0.1}
-tfnet = TFNet(options)
-
-def yoloFunction(image):
-    img = np.asarray(image, dtype="uint8")
-    img1 = cv2.imdecode(img, cv2.IMREAD_COLOR)
-    img2 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
-    result = tfnet.return_predict(img2) 
-    return json.dumps(str(result)) 
-```
 ![](object-detection1.gif)
 
-Result from `return_predict(img2)` will be a list of dictionaries representing each detected object's values in the same format as a JSON, which will be returned to our backend `nodeJS` directly without storing anything.
-
-Output of `return_predict(img2)`:
+Output of object detection:
 ```sh
 [{'label': 'person', 'confidence': 0.3876104, 'topleft': {'x': 991, 'y': 337}, 'bottomright': {'x': 1133, 'y': 442}}, 
 {'label': 'truck', 'confidence': 0.16879167, 'topleft': {'x': 221, 'y': 268}, 'bottomright': {'x': 1711, 'y': 732}}, 
