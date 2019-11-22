@@ -1,0 +1,49 @@
+version: "3.2"
+
+services:
+  ################### YOLO ###################
+  yolo:
+    image: ict3102_prt_yolo
+    build: . # Build image from Yolo Dockerfile
+    entrypoint: # Set Flask entry point
+      - flask
+      - run
+      - --host=0.0.0.0
+    environment:
+      - FLASK_APP=./app/flaskAPI.py
+      - SERVICE_PORTS=5000 # Defined for HAProxy
+    ports:
+      - 5000:5000 # Forward the exposed port 5000 on the container to port 5000 on the host machine
+    deploy:
+      replicas: 5
+      update_config:
+        parallelism: 5
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        window: 120s
+    networks:
+      - backend
+  ################# HAProxy #################
+  proxy:
+    image: dockercloud/haproxy
+    depends_on:
+      - ict3102_prt_yolo
+    environment:
+      - BALANCE=leastconn
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+    networks:
+      - backend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+# Networks to be created to facilitate communication between containers
+networks:
+  backend:
+    driver: overlay
+    attachable: true

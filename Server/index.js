@@ -9,7 +9,7 @@ var image = "";
 var yoloResult;
 var yoloArray = [];
 
-const apiLink = "http://yolo:5000/getYolo";
+const apiLink = "http://proxy:80/getYolo";
 
 // Type Defs and Resolvers for GraphQL
 const typeDefs = gql`

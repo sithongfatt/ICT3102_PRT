@@ -1,5 +1,6 @@
 #!flask/bin/python
 from flask import Flask, jsonify, request
+import socket
 #import valueTesting
 from app.objectDetection import yoloFunction, test_yolo, testOriginalFunction
 import sys
@@ -13,6 +14,10 @@ def hello():
 def testYolo():
     result = test_yolo()
     return jsonify({"yolo": result})
+
+@app.route('/testLoadBalancer')
+def testLoadBalancer():
+    return socket.gethostname()
 
 @app.route('/test-original')
 def testOriginalYolo():
