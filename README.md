@@ -192,8 +192,9 @@ The project heavily utilised depcheck library to ensure that the dependencies in
 1. Download `Docker Toolbox` from https://github.com/docker/toolbox/releases
 
 2. Go through the installation client of `Docker Toolbox` while checking the following to download
+
 <p align="center">
-  <img src="images/DockerToolboxSetup.png">
+  <img src="images/ReplacedDockerSetup.png">
 </p>
 
 3. After installation, run `Docker Quickstart Terminal` and accept the port permission prompts
