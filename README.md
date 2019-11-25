@@ -44,7 +44,7 @@ There are two versions of the project with this being the intermediate project t
 
 ## System Architecture
 
-The following system architecture diagram will give a high level view of how the three main components of the application will interact with one another.
+The following system architecture diagram will give a high level view of how the four main components of the application will interact with one another.
 
 <p align="center">
   <img src="images/ReplacedArchitectureDiagram.JPG" alt="Logo" width="800" height="400">
