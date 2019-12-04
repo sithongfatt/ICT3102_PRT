@@ -377,6 +377,7 @@ http://localhost:3000
 - [rc-slider](https://www.npmjs.com/package/rc-slider)
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone)
 - [depcheck](https://www.npmjs.com/package/depcheck)
+- [Loading Balancing with HAProxy and Docker] (https://medium.com/@nirgn/load-balancing-applications-with-haproxy-and-docker-d719b7c5b231)
 
 
 # Contact Team
